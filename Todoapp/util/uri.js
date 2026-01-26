@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config({
   quiet: true,
-  path: "../.env",
+  path: "./.env",
 });
 
 // Validate required variables
