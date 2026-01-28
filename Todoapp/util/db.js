@@ -1,15 +1,16 @@
 // db.js
 import { MongoClient } from 'mongodb';
-import uri, { databasename } from './uri.js'
+import uri, { databasename, mongoConnection } from './uri.js'
 
 const DATABASE = databasename;
+const CONNECTION = mongoConnection;
 const POSTS = 'posts';
 const COUNTER = 'counter';
 
 let db = null;
 
 // Create a single MongoClient instance
-export const client = new MongoClient(uri); // connection
+export const client = new MongoClient(mongoConnection); // connection
 
 // Create and reuse a single database connection
 export async function getDB(database = DATABASE) {

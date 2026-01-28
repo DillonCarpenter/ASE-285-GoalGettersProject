@@ -15,8 +15,11 @@ if (!password) throw new Error("MONGO_PASSWORD is not defined");
 
 const cluster = process.env.MONGO_CLUSTER;
 if (!cluster) throw new Error("MONGO_CLUSTER is not defined");
+const connection = process.env.CONNECTION_STRING;
+if (!connection) throw new Error("CONNECTION_STRING is not defined")
 
 export const databasename = process.env.MONGO_DATABASE || "todoapp";
+export const mongoConnection = connection;
 
 // Construct the MongoDB connection string
 const uri = `mongodb+srv://${user}:${password}@cluster0.${cluster}.mongodb.net/`;
