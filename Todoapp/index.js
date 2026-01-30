@@ -4,6 +4,8 @@ import methodOverride from 'method-override';
 
 import { getDB, getPostsCollection, getCounterCollection } from './util/db.js';
 import { runListGet, runAddPost } from './util/util.js'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 const db = await getDB();
 const posts = getPostsCollection();
@@ -11,12 +13,20 @@ const counter = getCounterCollection();
 
 const app = express();
 
+// recreate __dirname
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.urlencoded({ extended: true }))
 app.use('/public', express.static('public'));
 app.use(methodOverride('_method'))
 
+// static files: We might need this
+//app.use(express.static(path.join(__dirname, 'public')))
+
 app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'))
 
 app.listen(5500, function () {
   console.log('listening on 5500')
