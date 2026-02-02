@@ -130,4 +130,5 @@
 # Total Features and Requirements
 - Total Features: 12
 - Total Requirements: 46
+- Total Projected Tests: 36
 ---
