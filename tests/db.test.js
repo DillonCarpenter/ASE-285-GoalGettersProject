@@ -57,7 +57,7 @@ describe('Database Utility Tests', () => {
     });
 
     // Now import our module (it will use the mocked MongoDB)
-    dbModule = await import('../util/db.js');
+    dbModule = await import('../src/util/db.js');
   });
 
   // Cleanup: runs after all tests
