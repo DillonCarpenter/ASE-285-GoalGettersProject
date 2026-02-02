@@ -1,9 +1,14 @@
+---
+marp: true
+theme: default
+---
+
 # Goal Getters
 
 ---
 # A ToDo app
 #### For all of your task tracking needs
-#### Solves Organizational Problems by organizing and Creating Tasksasks
+#### Solves organizational problems by organizing and creating tasks
 ---
 # Team Rules
 - Communicate Clearly
@@ -20,34 +25,37 @@
 ---
 # David-Michael Davies: Team Member
 ## Sprint 1
-- Week 4: Starting the First Feature
+- Week 4: Defining the database schema
   - Set up the schema
   - Connect to the database
   - Ensure these elements update properly
-- Week 5: Finish the First Feature, Start second feature
+- Week 5: Sign In/Sign Up
   - Ensure the elements update properly
   - Set up the Sign up/in/out pages
-- Week 6: Continue Second Feature
+---
+- Week 6: Sign In/Sign Up
   - Set up authentication functionality
   - Implement Password Hashing
-- Week 7: Finish Second Feature
+- Week 7: Finish Sign In/Sign Up
   - Mostly ensuring user information is stored and secure
   - Polishing the UI associated with sign up/in/out
 ---
 ## Sprint 2
-- Week 10: Start the Third Feature
+- Week 10: Search bar
   - Search bar and filtering options
   - Ensure these elements respond to user input
-- Week 11: Finish the Third Feature
+- Week 11: Search bar
   - Clear search option
   - Ensure that the clear search option resets the search results
-- Week 12: Start the Last Feature
+---
+- Week 12: Recurring tasks
   - Set up recurring task option
   - Set up recurrence schedule
   - Ensure recurrence schedule is stored in the database
-- Week 13: Finish the Last feature
+- Week 13: Recurring tasks
   - Ensure recurrence schedule is stored in the database
   - Ensure the persistence of the recurrence rules.
+---
 - Week 13: Integration and testing
   - Also Flex week
 ---
@@ -71,7 +79,7 @@
   - Show colored badge/label in the list
   - Persist category after refresh
 - Done when: same category always same color + persists.
-
+---
 - Week 7 (Sprint 1–4) — Finish Feature 2 + Sprint 1 polish
   - Category editing for existing tasks
   - UI polish 
@@ -131,4 +139,3 @@
 - Total Features: 12
 - Total Requirements: 46
 - Total Projected Tests: 36
----
