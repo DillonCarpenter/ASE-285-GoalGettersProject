@@ -1,9 +1,11 @@
 import dotenv from "dotenv";
 
+const envPath = process.platform === 'win32' ? './.env' : '../.env';
+
 // Load environment variables
 dotenv.config({
   quiet: true,
-  path: "../.env",
+  path: envPath,
 });
 
 // Validate required variables
