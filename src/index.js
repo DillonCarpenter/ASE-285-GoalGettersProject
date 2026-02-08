@@ -20,6 +20,10 @@ const __dirname = path.dirname(__filename)
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.urlencoded({ extended: true }))
 app.use('/public', express.static('public'));
+
+// added styles folder to serve static CSS files
+app.use('/styles', express.static(path.join(__dirname, 'views/styles')));
+
 app.use(methodOverride('_method'))
 
 // static files: We might need this
