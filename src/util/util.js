@@ -15,6 +15,8 @@ export async function runAddPost(req, resp) {
   try {
     const counter = getCounterCollection();
     const posts = getPostsCollection();
+    const category = req.body.category;
+
 
     // 1. Increase counter and get the NEW value in one atomic step
     const result = await counter.findOneAndUpdate(
@@ -23,13 +25,10 @@ export async function runAddPost(req, resp) {
       { returnDocument: 'after', upsert: true }
     );
 
-    const newId = result.count; // now safe to access
-
-    // 2. Insert new post using the incremented ID
     const newPost = {
-      _id: newId,
       title: req.body.title,
-      date: req.body.date
+      date: req.body.date,
+      category: req.body.category
     };
 
     await posts.insertOne(newPost);
