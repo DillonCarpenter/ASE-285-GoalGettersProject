@@ -65,3 +65,11 @@
 	padding: 1.5rem 2rem 2rem;
 }
 
+
+#taskCategory:invalid {
+  color: rgba(250, 250, 250, 0.55);
+}
+
+#taskCategory {
+  color: #fafafa;
+}
