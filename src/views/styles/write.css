@@ -1,0 +1,75 @@
+/* Write Modal */
+
+.write-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(24, 26, 27, 0.85);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 1002;
+	animation: fadeIn 0.3s ease forwards;
+}
+
+.write-modal {
+	background: #23272a;
+	border-radius: 12px;
+	padding: 2.25rem 2.5rem 2rem 2.5rem;
+	max-width: 500px;
+	width: min(92vw, 500px);
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+	animation: slideFadeIn 0.4s ease forwards;
+}
+
+.write-modal__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.write-modal__title {
+	margin: 0;
+	font-size: 2rem;
+	color: #fafafa;
+	letter-spacing: 1px;
+}
+
+.write-modal__form {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.write-modal__group {
+	margin: 0;
+}
+
+.write-modal__label {
+	font-weight: 500;
+	margin-bottom: 0.5rem;
+	display: block;
+}
+
+.write-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: auto;
+	align-self: flex-end;
+	padding: 1.5rem 2rem 2rem;
+}
+
+
+#taskCategory:invalid {
+  color: rgba(250, 250, 250, 0.55);
+}
+
+#taskCategory {
+  color: #fafafa;
+}
