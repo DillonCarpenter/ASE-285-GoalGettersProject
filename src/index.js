@@ -2,7 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 
-import { getDB, getPostsCollection, getCounterCollection } from './util/db.js';
+import { getDB, getPostsCollection, getCounterCollection, POSTS } from './util/db.js';
 import { runListGet, runAddPost } from './util/util.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
