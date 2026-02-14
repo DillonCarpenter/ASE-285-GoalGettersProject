@@ -6,29 +6,51 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-  <link rel="stylesheet" href="styles/global.css" />
-  <title>Document</title>
+  <link rel="stylesheet" href="/styles/global.css" />
+  <link rel="stylesheet" href="/styles/write.css" />
+  <title>Detail</title>
 </head>
 
 <body>
   <%- include('nav.ejs') %>
-    <div class="container mt-3">
-      <div class="card" style="width: 100%">
-        <div class="card-body">
-          <h5 class="card-title">
-            <%= data.title %>
-          </h5>
-          <h6 class="card-subtitle mb-2 text-muted">
-            <%= data.date %>
-          </h6>
-
-          <form action="/edit" method="POST">
-            <input type="hidden" name="id" value="<%=data._id %>">
-            <button>Edit</button>
-          </form>
+    <div class="write-modal-overlay">
+      <div class="write-modal">
+        <div class="write-modal__header">
+          <h2 class="write-modal__title">Task Details</h2>
+          <a id="closeWriteModalBtn" href="/list" class="btn btn-circle" aria-label="Close">
+            &times;
+          </a>
         </div>
+        <form action="/edit?_method=PUT" method="POST" class="write-modal__form">
+          <input type="hidden" name="id" value="<%= data._id %>">
+          <div class="write-modal__group">
+            <input id="taskTitle" type="text" class="form-control" name="title" value="<%= data.title %>" data-initial="<%= data.title %>" placeholder="Title" />
+          </div>
+          <div class="write-modal__group">
+            <input id="taskDate" type="text" class="form-control" name="date" value="<%= data.date %>" data-initial="<%= data.date %>" placeholder="Date (YYYY-MM-DD)" />
+          </div>
+          <div class="write-modal__group">
+            Categories & Tags can be easily added here in the future.
+          </div>
+          <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
+        </form>
       </div>
     </div>
-</body>
 
+    <script>
+      const form = document.querySelector('.write-modal__form');
+      const saveBtn = document.getElementById('saveBtn');
+
+      const updateSaveState = () => {
+        const fields = form.querySelectorAll('[data-initial]');
+        const changed = Array.from(fields).some((field) => field.value !== field.dataset.initial);
+        saveBtn.disabled = !changed;
+        saveBtn.classList.toggle('is-disabled', !changed);
+      };
+
+      form.addEventListener('input', updateSaveState);
+      form.addEventListener('change', updateSaveState);
+      updateSaveState();
+    </script>
+</body>
 </html>
