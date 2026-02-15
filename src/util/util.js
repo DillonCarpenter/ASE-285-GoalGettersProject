@@ -15,6 +15,8 @@ export async function runAddPost(req, resp) {
   try {
     const counter = getCounterCollection();
     const posts = getPostsCollection();
+    const category = req.body.category;
+
 
     // 1. Increase counter and get the NEW value in one atomic step
     const result = await counter.findOneAndUpdate(
