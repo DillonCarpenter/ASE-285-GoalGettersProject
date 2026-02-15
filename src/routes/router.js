@@ -25,7 +25,7 @@ export function createRouter(db) {
     try {
       await runAddPost(req);
       // Changed inital redirect to list page
-      resp.redirect('/list');          
+      resp.redirect('/list');
     } catch (e) {
       console.error(e);
       resp.status(500).send('Error');
@@ -88,13 +88,22 @@ export function createRouter(db) {
       resp.status(400).send({ error: 'invalid id' });
       return;
     }
+
+    const allowed = new Set(["School", "Work", "Personal", "Others"]);
+    const category = (req.body.category || "").trim();
+    if (!allowed.has(category)) {
+      return resp.status(400).send({ error: "invalid category" });
+    }
+
     await posts.updateOne(
       { _id: id },
-      { $set: { title: req.body.title, date: req.body.date, category: req.body.category } }
+      { $set: { title: req.body.title, date: req.body.date, category } }
     );
-    console.log('app.put.edit: Update complete')
-    resp.redirect('/list')
+
+    console.log('app.put.edit: Update complete');
+    resp.redirect('/list');
   });
+
 
 
   return router;
