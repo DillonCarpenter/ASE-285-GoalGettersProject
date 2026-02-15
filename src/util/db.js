@@ -4,7 +4,7 @@ import uri, { databasename, mongoConnection } from './uri.js'
 
 const DATABASE = databasename;
 const CONNECTION = mongoConnection;
-const POSTS = 'posts';
+export const POSTS = 'posts';
 const COUNTER = 'counter';
 
 let db = null;
