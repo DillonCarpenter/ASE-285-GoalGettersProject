@@ -24,14 +24,25 @@
         <form action="/edit?_method=PUT" method="POST" class="write-modal__form">
           <input type="hidden" name="id" value="<%= data._id %>">
           <div class="write-modal__group">
-            <input id="taskTitle" type="text" class="form-control" name="title" value="<%= data.title %>" data-initial="<%= data.title %>" placeholder="Title" />
+            <input id="taskTitle" type="text" class="form-control" name="title" value="<%= data.title %>"
+              data-initial="<%= data.title %>" placeholder="Title" />
           </div>
           <div class="write-modal__group">
-            <input id="taskDate" type="text" class="form-control" name="date" value="<%= data.date %>" data-initial="<%= data.date %>" placeholder="Date (YYYY-MM-DD)" />
+            <input id="taskDate" type="text" class="form-control" name="date" value="<%= data.date %>"
+              data-initial="<%= data.date %>" placeholder="Date (YYYY-MM-DD)" />
           </div>
           <div class="write-modal__group">
-            Categories & Tags can be easily added here in the future.
+            <select id="taskCategory" class="form-control" name="category" required
+              data-initial="<%= data.category || 'Personal' %>">
+
+              <option value="School" <%=(data.category==="School" ) ? "selected" : "" %>>School</option>
+              <option value="Work" <%=(data.category==="Work" ) ? "selected" : "" %>>Work</option>
+              <option value="Personal" <%=(!data.category || data.category==="Personal" ) ? "selected" : "" %>>Personal
+              </option>
+              <option value="Others" <%=(data.category==="Others" ) ? "selected" : "" %>>Others</option>
+            </select>
           </div>
+
           <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
         </form>
       </div>
@@ -53,4 +64,5 @@
       updateSaveState();
     </script>
 </body>
+
 </html>
