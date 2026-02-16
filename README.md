@@ -19,7 +19,7 @@ theme: default
 ## Categories
 - Each task has a category - Completed
 - Users can pick categories - Completed
-- Users can change categories
+- Users can change categories - Completed
 - Categories are visually different - Completed
 ---
 ## Due Date Alerts
