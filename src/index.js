@@ -11,6 +11,10 @@ import { fileURLToPath } from 'url'
 const bcrypt = require("bcrypt");
 const user = require("./util/user.js");
 
+// routes
+import { createApiRouter } from './routes/api.js';
+import { createRouter } from './routes/router.js';
+
 const db = await getDB();
 const posts = getPostsCollection();
 const counter = getCounterCollection();
@@ -24,7 +28,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
 app.use('/public', express.static('public'));
 
 // added styles folder to serve static CSS files
@@ -34,6 +38,9 @@ app.use(methodOverride('_method'))
 
 // static files: We might need this
 //app.use(express.static(path.join(__dirname, 'public')))
+
+app.use('/api', createApiRouter(db));
+app.use('/', createRouter(db));
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
