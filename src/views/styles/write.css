@@ -73,16 +73,3 @@
 #taskCategory {
   color: #fafafa;
 }
-
-.btn.is-disabled {
-	opacity: 1;
-	cursor: not-allowed;
-	background: #8c8c8c;
-	border-color: #8c8c8c;
-	color: #f2f2f2;
-	pointer-events: none;
-}
-
-a.btn {
-	text-decoration: none;
-}
