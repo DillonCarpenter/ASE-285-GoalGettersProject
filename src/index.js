@@ -2,14 +2,20 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 
-import { getDB, getPostsCollection, getCounterCollection } from './util/db.js';
+import { getDB, getPostsCollection, getCounterCollection, POSTS } from './util/db.js';
 import { runListGet, runAddPost } from './util/util.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
+//login variables, created first to avoid the await segment
+const bcrypt = require("bcrypt");
+const user = require("./util/user.js");
+
 const db = await getDB();
 const posts = getPostsCollection();
 const counter = getCounterCollection();
+
+
 
 const app = express();
 
@@ -53,6 +59,33 @@ app.post('/add', async function (req, resp) {
     resp.status(500).send('Error');
   }
 });
+
+//start of login blocks; may need to be moved
+app.post("/login", async (req, res) =>{
+  try{
+      const {username,password} = req.body;
+      const find_user = await user.findOne({username});
+      if(!find_user) return res.status(400).json({message: "Error: User Not Found."});
+      const isMatch = await bcrypt.compare(password, find_user.password);
+      if(!isMatch) return res.status(400).json({message: "Error: Invalid credentials."});
+      res.json({ message: "Login successful" });
+  } catch {
+      res.status(500).json({ error: "Not successful." });
+  }
+});
+
+app.post("/signup", async (req, res)=>{
+    const {username,password} = req.body;
+    const hashPass = async function (){ return await bcrypt.hash(password, 10);}
+    const newUser = new user({
+      username,
+      password: hashPass
+    });
+    await newUser.save();
+    res.json({message: "User created."});
+});
+
+//end of login blocks
 
 app.get('/list', function (req, resp) {
   runListGet(req, resp);
