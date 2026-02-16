@@ -47,7 +47,7 @@ theme: default
 ## Implementation of List View
 - The system shall display all existing posts in a list view. - In Progress
 - Each list item shall show key post information (e.g., title, date, or status). - In Progress
-- Users shall be able to select a post from the list to view, edit, or delete it. Completed
+- Users shall be able to select a post from the list to view, edit, or delete it. - Completed
 ---
 ## Repeating Tasks
 - The system shall allow users to create tasks that repeat on a defined schedule (e.g., daily, weekly, monthly).
@@ -58,8 +58,8 @@ theme: default
 ---
 ## Improved Navigation
 
-- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view).
-- All views must be functionally routed using the frontend routing system.
+- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). -In Progress
+- All views must be functionally routed using the frontend routing system. - In Progress
 - Navigation actions shall not cause unnecessary page reloads.
 ---
 ## Calendar View for Tasks
