@@ -17,10 +17,10 @@ theme: default
 - Status is saved and persistent
 ---
 ## Categories
-- Each task has a category
-- Users can pick categories
-- Users can change categories
-- Categories are visually different
+- Each task has a category - Completed
+- Users can pick categories - Completed
+- Users can change categories - Completed
+- Categories are visually different - Completed
 ---
 ## Due Date Alerts
 - Overdue Tasks are highlighted
@@ -40,14 +40,14 @@ theme: default
 - Users can clear all filters.
 ---
 ## TASK CRUD
-- The system shall integrate with a database to allow users to create, edit, and delete posts.
-- The frontend shall provide input forms that allow users to submit and update post data.
-- Changes made to posts shall be reflected in real time or upon refresh.
+- The system shall integrate with a database to allow users to create, edit, and delete posts. - In Progress
+- The frontend shall provide input forms that allow users to submit and update post data. - Completed
+- Changes made to posts shall be reflected in real time or upon refresh. - In Progress
 ---
 ## Implementation of List View
-- The system shall display all existing posts in a list view.
-- Each list item shall show key post information (e.g., title, date, or status).
-- Users shall be able to select a post from the list to view, edit, or delete it.
+- The system shall display all existing posts in a list view. - In Progress
+- Each list item shall show key post information (e.g., title, date, or status). - In Progress
+- Users shall be able to select a post from the list to view, edit, or delete it. - Completed
 ---
 ## Repeating Tasks
 - The system shall allow users to create tasks that repeat on a defined schedule (e.g., daily, weekly, monthly).
@@ -58,8 +58,8 @@ theme: default
 ---
 ## Improved Navigation
 
-- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view).
-- All views must be functionally routed using the frontend routing system.
+- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). -In Progress
+- All views must be functionally routed using the frontend routing system. - In Progress
 - Navigation actions shall not cause unnecessary page reloads.
 ---
 ## Calendar View for Tasks
@@ -70,15 +70,15 @@ theme: default
 ---
 ## Defining the database schema
 Requirements:
-- list, tasks, description and tags must be stored as variables that take values from user input
-- these values must be stored in a database 
-- database must update these values when any of these items are added, changed or deleted
+- list, tasks, description and tags must be stored as variables that take values from user input - Completed
+- these values must be stored in a database - Completed
+- database must update these values when any of these items are added, changed or deleted - Completed
 ---
 ## Sign In/Up/Out
 Requirements:
-- User authentication: user creates a username and password that will be authenticated on login
-- Password Hashing: passwords are encrypted within the database
-- UI Elements: The UI changes depending on whether the user is signed in
+- User authentication: user creates a username and password that will be authenticated on login - In Progress
+- Password Hashing: passwords are encrypted within the database - In Progress
+- UI Elements: The UI changes depending on whether the user is signed in - In Progress
 ---
 ## Search bar
 Requirements:
