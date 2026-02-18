@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Sign in</title>
+
+    </head>
+    <body>
+        <h3>Sign In</h3>
+        <form id="loginForm">
+            <input type="text" id="username" required />
+            <input type="password" id="password" required/>
+            <button type="submit">Sign in</button> 
+        </form>
+    </body>
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async (e) =>  {
+            e.preventDefault();
+            
+            const username = document.getElementById("username");
+            const password = document.getElementById("password");
+
+            const response = await fetch("http://localhost:5500/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({username,password})
+        });
+        const data = await response.json();
+        console.log(data.message);
+    });
+    </script>
+
+</html>
