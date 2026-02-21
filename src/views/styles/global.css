@@ -57,6 +57,12 @@ body {
 button {
   border: none;
   outline: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .btn {
@@ -65,6 +71,7 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
   transition: var(--transition);
   font-weight: 500;
   animation: fadeIn 0.3s ease forwards;
@@ -142,3 +149,18 @@ button {
 .cat-personal{ background:#16a34a; }
 .cat-others { background:#d97706 !important; }
 
+/* Delete button */
+.delete {
+  background: #dc2626;
+  color: white;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.delete:hover {
+  background: #b91c1c;
+}
