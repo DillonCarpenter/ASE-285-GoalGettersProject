@@ -36,6 +36,31 @@ export function createRouter(db) {
     runListGet(req, resp);
   });
 
+
+
+  router.patch("/toggle-complete", async (req, resp) => {
+    const id = parseObjectId(req.body._id);
+    if (!id) return resp.status(400).send({ error: "invalid id" });
+
+    try {
+      const post = await posts.findOne({ _id: id });
+      if (!post) return resp.status(404).send({ error: "not found" });
+
+      const next = !post.completed;
+
+      await posts.updateOne(
+        { _id: id },
+        { $set: { completed: next } }
+      );
+
+      resp.json({ ok: true, completed: next });
+    } catch (e) {
+      console.error(e);
+      resp.status(500).send({ error: "toggle error" });
+    }
+  });
+
+
   router.delete('/delete', async function (req, resp) {
     const id = parseObjectId(req.body._id);
     if (!id) {
