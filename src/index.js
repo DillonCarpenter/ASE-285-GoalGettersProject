@@ -1,4 +1,7 @@
 import express from 'express';
+import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
+import session from 'express-session';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 
@@ -6,6 +9,7 @@ import { getDB, getPostsCollection, getCounterCollection, POSTS } from './util/d
 import { runListGet, runAddPost } from './util/util.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import {User} from "./util/user.js"
 
 const db = await getDB();
 const posts = getPostsCollection();
@@ -17,7 +21,15 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+app.use(session({
+  secret: "supersecretkey",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }
+}));
+
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(express.json()); // Will remove if I find it elsewhere
 app.use(express.urlencoded({ extended: true }))
 app.use('/public', express.static('public'));
 
@@ -32,12 +44,20 @@ app.use(methodOverride('_method'))
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+console.log("Connecting to Mongo...");
+try{
+  await mongoose.connect(process.env.CONNECTION_STRING);
+  console.log("Mongo Connected!");
+} catch(e){
+  console.error("Connection failed: ",e);
+}
 app.listen(5500, function () {
   console.log('listening on 5500')
 });
 
-app.get('/', function (_, resp) {
+app.get('/', function (req, resp) {
   try {
+    if(!req.session.userId) return resp.redirect('/login');
     resp.render('write.ejs')
   } catch (e) {
     console.error(e);
@@ -137,3 +157,40 @@ app.get('/listjson', async function (req, resp) {
     console.error(e);
   }
 });
+app.get('/login',(req, res) => {
+  if(req.session.userId) return resp.redirect('/');
+  res.render("login");
+});
+app.get('/signup',(req, res)=>{
+  res.render('signup')
+});
+//start of login route blocks; may need to be moved
+app.post("/login", async (req, resp) =>{
+  try{
+      const {username,password} = req.body;
+      
+      const find_user = await User.findOne({username});
+      if(!find_user) return resp.status(400).json({message: "Error: User Not Found."});
+      const isMatch = await bcrypt.compare(password, find_user.password);
+      if(!isMatch) return resp.status(400).json({message: "Error: Invalid credentials."});
+      req.session.userId = find_user._id;
+      resp.json({ message: "Login successful" });
+
+  } catch (e) {
+      console.error(e);
+      resp.status(500).json({ error: "Not successful." });
+  }
+});
+
+app.post("/signup", async (req, resp)=>{
+    const {username,password} = req.body;
+    const hashPass = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      username,
+      password: hashPass
+    });
+    await newUser.save();
+    resp.json({message: "User created."});
+});
+
+//end of login blocks

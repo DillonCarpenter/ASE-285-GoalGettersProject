@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
     username: {type: String, required: true, unique:true}, // To prevent confusion, no two users can have the same username
@@ -6,4 +7,4 @@ const userSchema = new mongoose.Schema({
     time_created: {type: Date, default: Date.now}
 });
 
-module.exports = mongoose.model("user",userSchema);
+export const User = mongoose.model("User",userSchema);
