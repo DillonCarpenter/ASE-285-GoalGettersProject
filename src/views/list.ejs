@@ -14,26 +14,60 @@
 <body>
   <%- include('nav.ejs') %>
 
-    <ul class="list-group">
+    <ul class="list-group no-bullets">
       <% for (var i=0; i < posts.length; i++){ %>
-        <li class="list-group-item">
-          <h4>
-            <a href="/detail/<%= posts[i]._id %>">Title : <%= posts[i].title %></a>
-              <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
-                <%= posts[i].category || "Personal" %>
-              </span>
-          </h4>
-          <p> Date : <%= posts[i].date %>
-          </p>
-         <!-- <p> Id : <%= posts[i]._id %> -->
-          </p>
-          <button class="delete" data-id="<%= posts[i]._id %>">Delete</button>
+        <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>">
+          <div class="task-row">
+            <button class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>" data-id="<%= posts[i]._id %>"
+              aria-label="Toggle completion">
+            </button>
+
+            <div class="task-main">
+              <h4 class="task-title <%= posts[i].completed ? 'task-title-complete' : '' %>">
+                <a href="/detail/<%= posts[i]._id %>">Title : <%= posts[i].title %></a>
+
+                <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase().trim() %>">
+                  <%= posts[i].category || "Personal" %>
+                </span>
+              </h4>
+
+              <p>Date : <%= posts[i].date %>
+              </p>
+
+              <button class="delete" data-id="<%= posts[i]._id %>">Delete</button>
+            </div>
+          </div>
         </li>
         <% } %>
     </ul>
 
     <script>
       document.addEventListener("click", async (e) => {
+
+        if (e.target.classList.contains("task-circle")) {
+          const id = e.target.dataset.id;
+
+          try {
+            const res = await fetch("/toggle-complete", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ _id: id })
+            });
+
+            if (!res.ok) throw new Error("Toggle failed");
+            const data = await res.json();
+
+            const li = e.target.closest("li");
+            const title = li.querySelector(".task-title");
+
+            e.target.classList.toggle("is-complete", data.completed);
+            title.classList.toggle("task-title-complete", data.completed);
+          } catch (err) {
+            console.error(err);
+          }
+          return;
+        }
+
         if (!e.target.classList.contains("delete")) return;
 
         const id = e.target.dataset.id;
@@ -61,4 +95,5 @@
     </script>
 
 </body>
+
 </html>
