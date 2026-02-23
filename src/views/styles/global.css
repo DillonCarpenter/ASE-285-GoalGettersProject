@@ -77,6 +77,11 @@ button {
   animation: fadeIn 0.3s ease forwards;
 }
 
+.btn_icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* Button Variants */
 .btn-circle {
   border-radius: 50%;
@@ -152,13 +157,7 @@ button {
 /* Delete button */
 .delete {
   background: #dc2626;
-  color: white;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
 }
 
 .delete:hover {
