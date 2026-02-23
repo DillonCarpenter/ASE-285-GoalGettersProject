@@ -13,8 +13,10 @@
   <title>Home</title>
 </head>
 
+<body data-username="<%= currentUser?.username || '' %>"></body>
 <body>
   <%- include('nav.ejs') %>
+  <%= currentUser?.username %>
     <div class="write-actions">
       <button id="openWriteModalBtn" class="btn btn-circle btn-add" title="Add Task">
         +

@@ -21,12 +21,19 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-app.use(session({
+app.use(session({ // Auth information, do not move
   secret: "supersecretkey",
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false }
 }));
+
+app.use(async (req, res, next) => { //middleware for the User's username so that it can be referenced in other pages
+    if (req.session.userId) {
+        res.locals.currentUser = await User.findById(req.session.userId);
+    }
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json()); // Will remove if I find it elsewhere
@@ -55,19 +62,22 @@ app.listen(5500, function () {
   console.log('listening on 5500')
 });
 
-app.get('/', function (req, resp) {
+app.get('/', async function (req, resp) {
   try {
     if(!req.session.userId) return resp.redirect('/login');
-    resp.render('write.ejs')
+    resp.render("write.ejs");
+    
   } catch (e) {
     console.error(e);
   }
 });
 
+
 app.post('/add', async function (req, resp) {
   try {
     await runAddPost(req, resp);
     resp.redirect('/');          // single response
+    console.log(resp.locals);
   } catch (e) {
     console.error(e);
     resp.status(500).send('Error');
@@ -131,13 +141,14 @@ app.get('/edit/:id', async function (req, resp) {
   }
 });
 
+  
 app.put('/edit', async function (req, resp) {
   try {
     await posts.updateOne(
       { _id: parseInt(req.body.id) },
-      { $set: { title: req.body.title, date: req.body.date } }
+      { $set: { title: req.body.title, date: req.body.date} }
     );
-
+    
     console.log('app.put.edit: Update complete');
     resp.redirect('/list');    // ✅ Correct
   } catch (e) {
@@ -158,7 +169,7 @@ app.get('/listjson', async function (req, resp) {
   }
 });
 app.get('/login',(req, res) => {
-  if(req.session.userId) return resp.redirect('/');
+  if(req.session.userId) return res.redirect('/');
   res.render("login");
 });
 app.get('/signup',(req, res)=>{
