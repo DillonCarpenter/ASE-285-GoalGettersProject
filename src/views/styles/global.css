@@ -77,6 +77,11 @@ button {
   animation: fadeIn 0.3s ease forwards;
 }
 
+.btn_icon {
+  width: 20px;
+  height: 20px;
+}
+
 /* Button Variants */
 .btn-circle {
   border-radius: 50%;
@@ -152,15 +157,59 @@ button {
 /* Delete button */
 .delete {
   background: #dc2626;
-  color: white;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
 }
 
 .delete:hover {
   background: #b91c1c;
+}
+
+.no-bullets{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.task-circle{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.55);
+  background: transparent;
+  margin-top: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: var(--transition);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-circle:hover{
+  border-color: rgba(255,255,255,0.85);
+}
+
+.task-circle.is-complete{
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.task-circle.is-complete::after{
+  content: "✓";
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.task-title-complete{
+  text-decoration: line-through;
+  opacity: 0.65;
 }
