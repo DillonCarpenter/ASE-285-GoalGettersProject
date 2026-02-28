@@ -8,15 +8,16 @@
 	gap: 1rem;
 }
 
-.list-group-item {
-	padding: 0.85rem 0.25rem 1.1rem;
-	display: grid;
-	grid-template-columns: 1fr auto;
-	grid-template-rows: auto auto;
-	column-gap: 1rem;
-	row-gap: 0.35rem;
-	border-bottom: 1px solid #2f3338;
-	animation: slideFadeIn 0.35s ease forwards;
+
+.list-group-item{
+  padding: 0.85rem 0.25rem 1.1rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  border-bottom: 1px solid #2f3338;
+  animation: slideFadeIn 0.35s ease forwards;
 }
 
 .list-group-item:last-child {
@@ -65,3 +66,35 @@
 		padding: 1rem 1.1rem;
 	}
 }
+
+/* checkbox on the far left, centered vertically */
+.list-group-item .task-circle{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: start;
+  margin-top: 0; /* override your global margin-top: 6px */
+}
+
+/* title + badge in the middle column */
+.list-group-item h4{
+  grid-column: 2;
+}
+
+/* date in the middle column */
+.list-group-item p{
+  grid-column: 2;
+}
+
+/* actions on the far right */
+.list-actions{
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: end;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+
+
