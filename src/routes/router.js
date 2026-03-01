@@ -128,8 +128,55 @@ export function createRouter(db) {
     console.log('app.put.edit: Update complete');
     resp.redirect('/list');
   });
-
-
+  
+  // API for JSON
+  
+  router.get('/listjson', async function (req, resp) {
+    try {
+      const res = await posts.find().toArray();
+      resp.send(res)
+    } catch (e) {
+      console.error(e);
+    }
+  });
+  router.get('/login',(req, res) => {
+    if(req.session.userId) return res.redirect('/');
+    res.render("login");
+  });
+  router.get('/signup',(req, res)=>{
+    res.render('signup')
+  });
+  //start of login route blocks; may need to be moved
+  router.post("/login", async (req, resp) =>{
+    try{
+        const {username,password} = req.body;
+        
+        const find_user = await User.findOne({username});
+        if(!find_user) return resp.status(400).json({message: "Error: User Not Found."});
+        const isMatch = await bcrypt.compare(password, find_user.password);
+        if(!isMatch) return resp.status(400).json({message: "Error: Invalid credentials."});
+        req.session.userId = find_user._id;
+        resp.json({ message: "Login successful" });
+  
+    } catch (e) {
+        console.error(e);
+        resp.status(500).json({ error: "Not successful." });
+    }
+  });
+  
+  router.post("/signup", async (req, resp)=>{
+      const {username,password} = req.body;
+      const hashPass = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        username,
+        password: hashPass
+      });
+      await newUser.save();
+      console.log("User created.");
+      resp.json({message: "User created."})
+  });
+  
+  //end of login blocks
 
   return router;
 }
