@@ -8,6 +8,8 @@ dotenv.config({
   path: envPath,
 });
 
+
+
 // Validate required variables
 const user = process.env.MONGO_USER;
 if (!user) throw new Error("MONGO_USER is not defined");
@@ -25,6 +27,7 @@ export const mongoConnection = connection;
 
 // Construct the MongoDB connection string
 const uri = `mongodb+srv://${user}:${password}@cluster0.${cluster}.mongodb.net/`;
+
 
 // Export the URI
 export default uri;
