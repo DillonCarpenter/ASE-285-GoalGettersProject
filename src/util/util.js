@@ -33,7 +33,7 @@ export async function runAddPost(req, resp) {
       title: req.body.title,
       date: req.body.date,
       category: req.body.category,
-      completed: false
+      completed: false,
       user: username,
       userId: req.session.userId
     };
