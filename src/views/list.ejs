@@ -17,20 +17,26 @@
     <ul class="list-group no-bullets">
       <% for (var i=0; i < posts.length; i++){ %>
         <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>">
+
+          <!-- Completion toggle -->
+          <button class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>" data-id="<%= posts[i]._id %>"
+            aria-label="Toggle completion">
+          </button>
+
           <h4>
-            <div><%= posts[i].title %></div>
-            
-              <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
-                <%= posts[i].category || "Personal" %>
-              </span>
+            <div>
+              <%= posts[i].title %>
+            </div>
+            <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
+              <%= posts[i].category || "Personal" %>
+            </span>
           </h4>
-          <p> <%= posts[i].date %>
+
+          <p>
+            <%= posts[i].date %>
           </p>
+
           <div class="list-actions">
-            <!-- Completion toggle -->
-            <button class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>" data-id="<%= posts[i]._id %>"
-              aria-label="Toggle completion">
-            </button>
             <!-- Edit -->
             <button class="btn btn-circle edit" type="button" data-id="<%= posts[i]._id %>" aria-label="Edit task" title="Edit">
               <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
