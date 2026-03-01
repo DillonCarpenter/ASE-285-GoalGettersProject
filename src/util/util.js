@@ -32,9 +32,10 @@ export async function runAddPost(req, resp) {
     const newPost = {
       title: req.body.title,
       date: req.body.date,
+      category: req.body.category,
+      completed: false
       user: username,
-      userId: req.session.userId,
-      category: req.body.category
+      userId: req.session.userId
     };
     console.log(newPost);
     await posts.insertOne(newPost);

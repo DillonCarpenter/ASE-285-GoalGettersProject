@@ -61,6 +61,12 @@ body {
 button {
   border: none;
   outline: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .btn {
@@ -69,9 +75,15 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 1;
   transition: var(--transition);
   font-weight: 500;
   animation: fadeIn 0.3s ease forwards;
+}
+
+.btn_icon {
+  width: 20px;
+  height: 20px;
 }
 
 /* Button Variants */
@@ -146,3 +158,62 @@ button {
 .cat-personal{ background:#16a34a; }
 .cat-others { background:#d97706 !important; }
 
+/* Delete button */
+.delete {
+  background: #dc2626;
+  cursor: pointer;
+}
+
+.delete:hover {
+  background: #b91c1c;
+}
+
+.no-bullets{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-row{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.task-circle{
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 2px solid rgba(255,255,255,0.55);
+  background: transparent;
+  margin-top: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: var(--transition);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-circle:hover{
+  border-color: rgba(255,255,255,0.85);
+}
+
+.task-circle.is-complete{
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.task-circle.is-complete::after{
+  content: "✓";
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.task-title-complete{
+  text-decoration: line-through;
+  opacity: 0.65;
+}

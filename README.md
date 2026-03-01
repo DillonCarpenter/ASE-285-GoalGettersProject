@@ -11,10 +11,10 @@ theme: default
 # Features and Requirements
 ---
 ## Task Completion Status
-- Each task has completed Status
-- Users can toggle completion
-- Completed tasks appear visually different
-- Status is saved and persistent
+- Each task has completed Status - Completed
+- Users can toggle completion - Completed
+- Completed tasks appear visually different - Completed
+- Status is saved and persistent - Completed
 ---
 ## Categories
 - Each task has a category - Completed
@@ -40,13 +40,13 @@ theme: default
 - Users can clear all filters.
 ---
 ## TASK CRUD
-- The system shall integrate with a database to allow users to create, edit, and delete posts. - In Progress
+- The system shall integrate with a database to allow users to create, edit, and delete posts. - Compled
 - The frontend shall provide input forms that allow users to submit and update post data. - Completed
-- Changes made to posts shall be reflected in real time or upon refresh. - In Progress
+- Changes made to posts shall be reflected in real time or upon refresh. - Completed
 ---
 ## Implementation of List View
-- The system shall display all existing posts in a list view. - In Progress
-- Each list item shall show key post information (e.g., title, date, or status). - In Progress
+- The system shall display all existing posts in a list view. - Completed
+- Each list item shall show key post information (e.g., title, date, or status). - Completed
 - Users shall be able to select a post from the list to view, edit, or delete it. - Completed
 ---
 ## Repeating Tasks
@@ -58,9 +58,9 @@ theme: default
 ---
 ## Improved Navigation
 
-- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). -In Progress
+- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). - In Progress
 - All views must be functionally routed using the frontend routing system. - In Progress
-- Navigation actions shall not cause unnecessary page reloads.
+- Navigation actions shall not cause unnecessary page reloads. - Completed
 ---
 ## Calendar View for Tasks
 - The system shall be able to fetch tasks in bulk from the database.
@@ -76,9 +76,10 @@ Requirements:
 ---
 ## Sign In/Up/Out
 Requirements:
-- User authentication: user creates a username and password that will be authenticated on login - In Progress
-- Password Hashing: passwords are encrypted within the database - In Progress
-- UI Elements: The UI changes depending on whether the user is signed in - In Progress
+- User authentication: user creates a username and password that will be authenticated on login - Completed
+- Password Hashing: passwords are encrypted within the database - Completed
+- UI Elements: The UI changes depending on whether the user is signed in - Completed
+- Posts are tied to accounts
 ---
 ## Search bar
 Requirements:
