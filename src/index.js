@@ -201,7 +201,8 @@ app.post("/signup", async (req, resp)=>{
       password: hashPass
     });
     await newUser.save();
-    resp.json({message: "User created."});
+    console.log("User created.");
+    resp.json({message: "User created."})
 });
 
 //end of login blocks

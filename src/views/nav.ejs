@@ -3,5 +3,13 @@
     <li><a href="/" class="nav__link">Home</a></li>
     <li><a href="/list" class="nav__link">List</a></li>
     <li><a href="/login" class="nav__link">Login</a></li>
+    <li class="username-display" id="usernameDisplay"></li>
+    <script>
+      const thisUser ="<%= currentUser ? currentUser.username : '' %>";
+      if(thisUser){
+        document.getElementById("usernameDisplay").innerHTML += thisUser;
+      }
+    </script>
+      
   </ul>
 </nav>

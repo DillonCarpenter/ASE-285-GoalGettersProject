@@ -51,6 +51,10 @@ body {
 .nav__link:hover {
   text-decoration: underline;
 }
+.username-display{
+  display: flex;
+  justify-content: right;
+}
 
 /* Global Button Base */
 

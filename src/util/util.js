@@ -3,10 +3,10 @@ import {User} from "./user.js"
 
 
 
-export async function runListGet(_, resp) {
+export async function runListGet(req, resp) {
   try {
     const posts = getPostsCollection();
-    const res = await posts.find().toArray();
+    const res = await posts.find({ userId: req.session.userId }).toArray();
     const query = { posts: res };
     resp.render('list.ejs', query)
   } catch (e) {
@@ -33,6 +33,7 @@ export async function runAddPost(req, resp) {
       title: req.body.title,
       date: req.body.date,
       user: username,
+      userId: req.session.userId,
       category: req.body.category
     };
     console.log(newPost);
