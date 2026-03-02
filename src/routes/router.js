@@ -1,7 +1,9 @@
 import express from "express";
 import { ObjectId } from "mongodb";
+import bcrypt from "bcrypt";
 import { getPostsCollection, getCounterCollection } from '../util/db.js';
 import { runAddPost, runListGet } from "../util/util.js";
+import { User } from "../util/user.js";
 
 export function createRouter(db) {
   const router = express.Router();
@@ -122,7 +124,7 @@ export function createRouter(db) {
 
     await posts.updateOne(
       { _id: id },
-      { $set: { title: req.body.title, date: req.body.date, category } }
+      { $set: { title: req.body.title, description: req.body.description, date: req.body.date, category } }
     );
 
     console.log('app.put.edit: Update complete');

@@ -28,6 +28,10 @@
               data-initial="<%= data.title %>" placeholder="Title" />
           </div>
           <div class="write-modal__group">
+            <textarea id="taskDescription" class="form-control" name="description"
+              data-initial="<%= data.description || '' %>" placeholder="Description"><%= data.description || '' %></textarea>
+          </div>
+          <div class="write-modal__group">
             <input id="taskDate" type="text" class="form-control" name="date" value="<%= data.date %>"
               data-initial="<%= data.date %>" placeholder="Date (YYYY-MM-DD)" />
           </div>
