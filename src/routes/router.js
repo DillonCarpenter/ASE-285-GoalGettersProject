@@ -5,6 +5,7 @@ import { getPostsCollection, getCounterCollection } from '../util/db.js';
 import { runAddPost, runListGet } from "../util/util.js";
 import { User } from "../util/user.js";
 
+
 export function createRouter(db) {
   const router = express.Router();
   const posts = getPostsCollection();
@@ -15,9 +16,12 @@ export function createRouter(db) {
     return new ObjectId(value);
   };
 
-  router.get('/', function (_, resp) {
+  router.get('/', function (req, resp) {
     try {
-      resp.render('index.ejs')
+      if (!req.session.userId) {
+        return resp.redirect("/login");
+      }
+      resp.render("index")
     } catch (e) {
       console.error(e);
     }
