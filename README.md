@@ -83,9 +83,9 @@ Requirements:
 ---
 ## Search bar
 Requirements:
-- search bar element that takes user input
+- search bar element that takes user input - Completed
 - search filtering option that allows user to search within a certain tag
-- option to Clear Search that clears the search bar and resets the search results
+- option to Clear Search that clears the search bar and resets the search results - Completed
 ---
 # Data Model and Architecture
 
