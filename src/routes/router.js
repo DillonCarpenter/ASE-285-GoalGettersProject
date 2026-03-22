@@ -10,12 +10,19 @@ export function createRouter(db) {
   const posts = getPostsCollection();
   const counter = getCounterCollection();
 
+  const requireCurrentUser = (req, res, next) => {
+    if (!res.locals.currentUser) {
+      return res.redirect('/login');
+    }
+    next();
+  };
+
   const parseObjectId = (value) => {
     if (!ObjectId.isValid(value)) return null;
     return new ObjectId(value);
   };
 
-  router.get('/', function (_, resp) {
+  router.get('/', requireCurrentUser, function (_, resp) {
     try {
       resp.render('index.ejs')
     } catch (e) {
@@ -23,7 +30,7 @@ export function createRouter(db) {
     }
   });
 
- router.post('/add', async function (req, resp) {
+ router.post('/add', requireCurrentUser, async function (req, resp) {
   try {
     const { title, description, date, category } = req.body;
     const allowed = new Set(["School", "Work", "Personal", "Others"]);
@@ -53,13 +60,13 @@ export function createRouter(db) {
   }
 });
 
-router.get('/list', function (req, resp) {
-  runListGet(req, resp);
-});
+  router.get('/list', requireCurrentUser, function (req, resp) {
+    runListGet(req, resp);
+  });
 
 
 
-  router.patch("/toggle-complete", async (req, resp) => {
+  router.patch("/toggle-complete", requireCurrentUser, async (req, resp) => {
     const id = parseObjectId(req.body._id);
     if (!id) return resp.status(400).send({ error: "invalid id" });
 
@@ -82,7 +89,7 @@ router.get('/list', function (req, resp) {
   });
 
 
-  router.delete('/delete', async function (req, resp) {
+  router.delete('/delete', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body._id);
     if (!id) {
       resp.status(400).send({ error: 'invalid id' });
@@ -103,7 +110,7 @@ router.get('/list', function (req, resp) {
     }
   });
 
-  router.get('/detail/:id', async function (req, resp) {
+  router.get('/detail/:id', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.params.id);
     if (!id) {
       resp.status(400).send({ error: 'invalid id' });
@@ -128,7 +135,7 @@ router.get('/list', function (req, resp) {
     }
   })
 
-  router.put('/edit', async function (req, resp) {
+  router.put('/edit', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body.id);
     if (!id) {
       return resp.status(400).send({ error: 'invalid id' });
@@ -177,8 +184,8 @@ router.get('/list', function (req, resp) {
   });
 
   // API for JSON
-
-  router.get('/listjson', async function (req, resp) {
+  
+  router.get('/listjson', requireCurrentUser, async function (req, resp) {
     try {
       const res = await posts.find().toArray();
       resp.send(res)
@@ -193,6 +200,20 @@ router.get('/list', function (req, resp) {
   router.get('/signup', (req, res) => {
     res.render('signup')
   });
+
+  const handleLogout = (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Logout failed.' });
+      }
+      res.clearCookie('connect.sid');
+      res.redirect('/login');
+    });
+  };
+
+  router.get('/logout', handleLogout);
+
   //start of login route blocks; may need to be moved
   router.post("/login", async (req, resp) => {
     try {
@@ -210,17 +231,31 @@ router.get('/list', function (req, resp) {
       resp.status(500).json({ error: "Not successful." });
     }
   });
+  
+  router.post("/signup", async (req, resp)=>{
+      try {
+        const {username, password} = req.body;
 
-  router.post("/signup", async (req, resp) => {
-    const { username, password } = req.body;
-    const hashPass = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      password: hashPass
-    });
-    await newUser.save();
-    console.log("User created.");
-    resp.json({ message: "User created." })
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+          return resp.status(409).json({ message: "Error: Username already exists." });
+        }
+
+        const hashPass = await bcrypt.hash(password, 10);
+        const newUser = new User({
+          username,
+          password: hashPass
+        });
+        await newUser.save();
+        console.log("User created.");
+        resp.json({message: "User created."});
+      } catch (e) {
+        if (e && e.code === 11000) {
+          return resp.status(409).json({ message: "Error: Username already exists." });
+        }
+        console.error(e);
+        resp.status(500).json({ error: "Not successful." });
+      }
   });
 
   //end of login blocks
