@@ -23,7 +23,7 @@ export function createRouter(db) {
     return new ObjectId(value);
   };
 
-  router.get('/', requireCurrentUser, function (_, resp) {
+  router.get('/', requireCurrentUser, function (req, resp) {
     try {
       if (!req.session.userId) {
         return resp.redirect("/login");
