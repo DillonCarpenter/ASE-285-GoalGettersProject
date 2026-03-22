@@ -31,6 +31,7 @@ export async function runAddPost(req, resp) {
 
     const newPost = {
       title: req.body.title,
+      description: req.body.description,
       date: req.body.date,
       category: req.body.category,
       completed: false,

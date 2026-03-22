@@ -96,5 +96,31 @@
   gap: 0.5rem;
 }
 
+/* Search bar */
+.search-wrap {
+	width: min(920px, 92vw);
+	margin: 1.5rem auto 0.5rem;
+}
 
+#taskSearch {
+	width: 100%;
+	padding: 0.9rem 1rem;
+	border: 1px solid #2f3338;
+	border-radius: 10px;
+	background: #111418;
+	color: #ffffff;
+	font-size: 0.95rem;
+	outline: none;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#taskSearch::placeholder {
+	color: #8b949e;
+}
+
+#taskSearch:focus {
+	border-color: #6c63ff;
+	box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+	background: #151a21;
+}
 

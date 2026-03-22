@@ -1,44 +1,76 @@
 import express from "express";
 import { ObjectId } from "mongodb";
+import bcrypt from "bcrypt";
 import { getPostsCollection, getCounterCollection } from '../util/db.js';
 import { runAddPost, runListGet } from "../util/util.js";
+import { User } from "../util/user.js";
+
 
 export function createRouter(db) {
   const router = express.Router();
   const posts = getPostsCollection();
   const counter = getCounterCollection();
 
+  const requireCurrentUser = (req, res, next) => {
+    if (!res.locals.currentUser) {
+      return res.redirect('/login');
+    }
+    next();
+  };
+
   const parseObjectId = (value) => {
     if (!ObjectId.isValid(value)) return null;
     return new ObjectId(value);
   };
 
-  router.get('/', function (_, resp) {
+  router.get('/', requireCurrentUser, function (req, resp) {
     try {
-      resp.render('index.ejs')
+      if (!req.session.userId) {
+        return resp.redirect("/login");
+      }
+      resp.render("index")
     } catch (e) {
       console.error(e);
     }
   });
 
-  router.post('/add', async function (req, resp) {
-    try {
-      await runAddPost(req);
-      // Changed inital redirect to list page
-      resp.redirect('/list');
-    } catch (e) {
-      console.error(e);
-      resp.status(500).send('Error');
-    }
-  });
+ router.post('/add', requireCurrentUser, async function (req, resp) {
+  try {
+    const { title, description, date, category } = req.body;
+    const allowed = new Set(["School", "Work", "Personal", "Others"]);
+    const today = new Date().toISOString().split("T")[0];
 
-  router.get('/list', function (req, resp) {
+    if (!title || !title.trim()) {
+      return resp.status(400).send("Title is required.");
+    }
+
+    if (!date) {
+      return resp.status(400).send("Date is required.");
+    }
+
+    if (date < today) {
+      return resp.status(400).send("Date cannot be in the past.");
+    }
+
+    if (!allowed.has((category || "").trim())) {
+      return resp.status(400).send("Invalid category.");
+    }
+
+    await runAddPost(req);
+    resp.redirect('/list');
+  } catch (e) {
+    console.error(e);
+    resp.status(500).send('Error');
+  }
+});
+
+  router.get('/list', requireCurrentUser, function (req, resp) {
     runListGet(req, resp);
   });
 
 
 
-  router.patch("/toggle-complete", async (req, resp) => {
+  router.patch("/toggle-complete", requireCurrentUser, async (req, resp) => {
     const id = parseObjectId(req.body._id);
     if (!id) return resp.status(400).send({ error: "invalid id" });
 
@@ -61,7 +93,7 @@ export function createRouter(db) {
   });
 
 
-  router.delete('/delete', async function (req, resp) {
+  router.delete('/delete', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body._id);
     if (!id) {
       resp.status(400).send({ error: 'invalid id' });
@@ -82,7 +114,7 @@ export function createRouter(db) {
     }
   });
 
-  router.get('/detail/:id', async function (req, resp) {
+  router.get('/detail/:id', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.params.id);
     if (!id) {
       resp.status(400).send({ error: 'invalid id' });
@@ -107,31 +139,57 @@ export function createRouter(db) {
     }
   })
 
-  router.put('/edit', async function (req, resp) {
+  router.put('/edit', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body.id);
     if (!id) {
-      resp.status(400).send({ error: 'invalid id' });
-      return;
+      return resp.status(400).send({ error: 'invalid id' });
     }
 
+    const { title, description, date } = req.body;
     const allowed = new Set(["School", "Work", "Personal", "Others"]);
     const category = (req.body.category || "").trim();
-    if (!allowed.has(category)) {
-      return resp.status(400).send({ error: "invalid category" });
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!title || !title.trim()) {
+      return resp.status(400).send("Title is required.");
     }
 
-    await posts.updateOne(
-      { _id: id },
-      { $set: { title: req.body.title, date: req.body.date, category } }
-    );
+    if (!date) {
+      return resp.status(400).send("Date is required.");
+    }
 
-    console.log('app.put.edit: Update complete');
-    resp.redirect('/list');
+    if (date < today) {
+      return resp.status(400).send("Date cannot be in the past.");
+    }
+
+    if (!allowed.has(category)) {
+      return resp.status(400).send("Invalid category.");
+    }
+
+    try {
+      await posts.updateOne(
+        { _id: id },
+        {
+          $set: {
+            title: title.trim(),
+            description,
+            date,
+            category
+          }
+        }
+      );
+
+      console.log('app.put.edit: Update complete');
+      resp.redirect('/list');
+    } catch (e) {
+      console.error(e);
+      resp.status(500).send("Error updating task.");
+    }
   });
-  
+
   // API for JSON
   
-  router.get('/listjson', async function (req, resp) {
+  router.get('/listjson', requireCurrentUser, async function (req, resp) {
     try {
       const res = await posts.find().toArray();
       resp.send(res)
@@ -139,43 +197,71 @@ export function createRouter(db) {
       console.error(e);
     }
   });
-  router.get('/login',(req, res) => {
-    if(req.session.userId) return res.redirect('/');
+  router.get('/login', (req, res) => {
+    if (req.session.userId) return res.redirect('/');
     res.render("login");
   });
-  router.get('/signup',(req, res)=>{
+  router.get('/signup', (req, res) => {
     res.render('signup')
   });
+
+  const handleLogout = (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: 'Logout failed.' });
+      }
+      res.clearCookie('connect.sid');
+      res.redirect('/login');
+    });
+  };
+
+  router.get('/logout', handleLogout);
+
   //start of login route blocks; may need to be moved
-  router.post("/login", async (req, resp) =>{
-    try{
-        const {username,password} = req.body;
-        
-        const find_user = await User.findOne({username});
-        if(!find_user) return resp.status(400).json({message: "Error: User Not Found."});
-        const isMatch = await bcrypt.compare(password, find_user.password);
-        if(!isMatch) return resp.status(400).json({message: "Error: Invalid credentials."});
-        req.session.userId = find_user._id;
-        resp.json({ message: "Login successful" });
-  
+  router.post("/login", async (req, resp) => {
+    try {
+      const { username, password } = req.body;
+
+      const find_user = await User.findOne({ username });
+      if (!find_user) return resp.status(400).json({ message: "Error: User Not Found." });
+      const isMatch = await bcrypt.compare(password, find_user.password);
+      if (!isMatch) return resp.status(400).json({ message: "Error: Invalid credentials." });
+      req.session.userId = find_user._id;
+      resp.json({ message: "Login successful" });
+
     } catch (e) {
-        console.error(e);
-        resp.status(500).json({ error: "Not successful." });
+      console.error(e);
+      resp.status(500).json({ error: "Not successful." });
     }
   });
   
   router.post("/signup", async (req, resp)=>{
-      const {username,password} = req.body;
-      const hashPass = await bcrypt.hash(password, 10);
-      const newUser = new User({
-        username,
-        password: hashPass
-      });
-      await newUser.save();
-      console.log("User created.");
-      resp.json({message: "User created."})
+      try {
+        const {username, password} = req.body;
+
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+          return resp.status(409).json({ message: "Error: Username already exists." });
+        }
+
+        const hashPass = await bcrypt.hash(password, 10);
+        const newUser = new User({
+          username,
+          password: hashPass
+        });
+        await newUser.save();
+        console.log("User created.");
+        resp.json({message: "User created."});
+      } catch (e) {
+        if (e && e.code === 11000) {
+          return resp.status(409).json({ message: "Error: Username already exists." });
+        }
+        console.error(e);
+        resp.status(500).json({ error: "Not successful." });
+      }
   });
-  
+
   //end of login blocks
 
   return router;

@@ -5,6 +5,7 @@ import session from 'express-session';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 
+
 import { getDB, getPostsCollection, getCounterCollection, POSTS } from './util/db.js';
 import { runListGet, runAddPost } from './util/util.js'
 import path from 'path'
@@ -32,7 +33,9 @@ app.use(session({ // Auth information, do not move
 
 app.use(async (req, res, next) => { //middleware for the User's username so that it can be referenced in other pages
     if (req.session.userId) {
-        res.locals.currentUser = await User.findById(req.session.userId);
+      res.locals.currentUser = await User.findById(req.session.userId);
+    } else {
+      res.locals.currentUser = null;
     }
     next();
 });
