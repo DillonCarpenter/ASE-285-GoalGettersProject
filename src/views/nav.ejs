@@ -5,7 +5,7 @@
     <li><a href="/login" class="nav__link">Login</a></li>
     <li class="username-display" id="usernameDisplay"></li>
     <script>
-      const thisUser ="<%= currentUser ? currentUser.username : '' %>";
+  const thisUser = "<%= typeof currentUser !== 'undefined' && currentUser ? currentUser.username : '' %>";
       if(thisUser){
         document.getElementById("usernameDisplay").innerHTML += thisUser;
       }

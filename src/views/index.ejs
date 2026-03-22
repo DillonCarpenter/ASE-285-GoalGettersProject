@@ -38,7 +38,7 @@
             <textarea id="taskDescription" class="form-control" name="description" placeholder="Description"></textarea>
           </div>
           <div class="write-modal__group">
-            <input id="taskDate" type="text" class="form-control" name="date" placeholder="Date (YYYY-MM-DD)" />
+            <input id="taskDate" type="date" class="form-control" name="date" required />
           </div>
           <div class="write-modal__group">
             <select id="taskCategory" class="form-control" name="category" required>
@@ -58,6 +58,14 @@
     </div>
 
     <script>
+      const taskDate = document.getElementById('taskDate');
+      if (taskDate) {
+        const today = new Date().toISOString().split('T')[0];
+        taskDate.min = today;
+      }
+    </script>
+
+    <script>
       const openBtn = document.getElementById('openWriteModalBtn');
       const modal = document.getElementById('writeModal');
       const closeBtn = document.getElementById('closeWriteModalBtn');
@@ -68,4 +76,5 @@
       };
     </script>
 </body>
+
 </html>
