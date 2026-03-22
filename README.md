@@ -79,7 +79,7 @@ Requirements:
 - User authentication: user creates a username and password that will be authenticated on login - Completed
 - Password Hashing: passwords are encrypted within the database - Completed
 - UI Elements: The UI changes depending on whether the user is signed in - Completed
-- Posts are tied to accounts
+- Posts are tied to accounts - Completed
 ---
 ## Search bar
 Requirements:
