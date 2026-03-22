@@ -51,6 +51,7 @@ body {
 .nav__link:hover {
   text-decoration: underline;
 }
+
 .username-display{
   display: flex;
   justify-content: left;
@@ -225,4 +226,11 @@ button {
   flex-direction: column;
   justify-content: center; 
   width: calc(40%); 
+}
+#taskDate {
+  color: #7a7a7a;
+}
+
+#taskDate:valid {
+  color: #ffffff;
 }
