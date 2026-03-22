@@ -30,16 +30,35 @@ export function createRouter(db) {
     }
   });
 
-  router.post('/add', requireCurrentUser, async function (req, resp) {
-    try {
-      await runAddPost(req);
-      // Changed inital redirect to list page
-      resp.redirect('/list');
-    } catch (e) {
-      console.error(e);
-      resp.status(500).send('Error');
+ router.post('/add', requireCurrentUser, async function (req, resp) {
+  try {
+    const { title, description, date, category } = req.body;
+    const allowed = new Set(["School", "Work", "Personal", "Others"]);
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!title || !title.trim()) {
+      return resp.status(400).send("Title is required.");
     }
-  });
+
+    if (!date) {
+      return resp.status(400).send("Date is required.");
+    }
+
+    if (date < today) {
+      return resp.status(400).send("Date cannot be in the past.");
+    }
+
+    if (!allowed.has((category || "").trim())) {
+      return resp.status(400).send("Invalid category.");
+    }
+
+    await runAddPost(req);
+    resp.redirect('/list');
+  } catch (e) {
+    console.error(e);
+    resp.status(500).send('Error');
+  }
+});
 
   router.get('/list', requireCurrentUser, function (req, resp) {
     runListGet(req, resp);
@@ -119,25 +138,51 @@ export function createRouter(db) {
   router.put('/edit', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body.id);
     if (!id) {
-      resp.status(400).send({ error: 'invalid id' });
-      return;
+      return resp.status(400).send({ error: 'invalid id' });
     }
 
+    const { title, description, date } = req.body;
     const allowed = new Set(["School", "Work", "Personal", "Others"]);
     const category = (req.body.category || "").trim();
-    if (!allowed.has(category)) {
-      return resp.status(400).send({ error: "invalid category" });
+    const today = new Date().toISOString().split("T")[0];
+
+    if (!title || !title.trim()) {
+      return resp.status(400).send("Title is required.");
     }
 
-    await posts.updateOne(
-      { _id: id },
-      { $set: { title: req.body.title, description: req.body.description, date: req.body.date, category } }
-    );
+    if (!date) {
+      return resp.status(400).send("Date is required.");
+    }
 
-    console.log('app.put.edit: Update complete');
-    resp.redirect('/list');
+    if (date < today) {
+      return resp.status(400).send("Date cannot be in the past.");
+    }
+
+    if (!allowed.has(category)) {
+      return resp.status(400).send("Invalid category.");
+    }
+
+    try {
+      await posts.updateOne(
+        { _id: id },
+        {
+          $set: {
+            title: title.trim(),
+            description,
+            date,
+            category
+          }
+        }
+      );
+
+      console.log('app.put.edit: Update complete');
+      resp.redirect('/list');
+    } catch (e) {
+      console.error(e);
+      resp.status(500).send("Error updating task.");
+    }
   });
-  
+
   // API for JSON
   
   router.get('/listjson', requireCurrentUser, async function (req, resp) {
@@ -148,11 +193,11 @@ export function createRouter(db) {
       console.error(e);
     }
   });
-  router.get('/login',(req, res) => {
-    if(req.session.userId) return res.redirect('/');
+  router.get('/login', (req, res) => {
+    if (req.session.userId) return res.redirect('/');
     res.render("login");
   });
-  router.get('/signup',(req, res)=>{
+  router.get('/signup', (req, res) => {
     res.render('signup')
   });
 
@@ -170,20 +215,20 @@ export function createRouter(db) {
   router.get('/logout', handleLogout);
 
   //start of login route blocks; may need to be moved
-  router.post("/login", async (req, resp) =>{
-    try{
-        const {username,password} = req.body;
-        
-        const find_user = await User.findOne({username});
-        if(!find_user) return resp.status(400).json({message: "Error: User Not Found."});
-        const isMatch = await bcrypt.compare(password, find_user.password);
-        if(!isMatch) return resp.status(400).json({message: "Error: Invalid credentials."});
-        req.session.userId = find_user._id;
-        resp.json({ message: "Login successful" });
-  
+  router.post("/login", async (req, resp) => {
+    try {
+      const { username, password } = req.body;
+
+      const find_user = await User.findOne({ username });
+      if (!find_user) return resp.status(400).json({ message: "Error: User Not Found." });
+      const isMatch = await bcrypt.compare(password, find_user.password);
+      if (!isMatch) return resp.status(400).json({ message: "Error: Invalid credentials." });
+      req.session.userId = find_user._id;
+      resp.json({ message: "Login successful" });
+
     } catch (e) {
-        console.error(e);
-        resp.status(500).json({ error: "Not successful." });
+      console.error(e);
+      resp.status(500).json({ error: "Not successful." });
     }
   });
   
@@ -212,7 +257,7 @@ export function createRouter(db) {
         resp.status(500).json({ error: "Not successful." });
       }
   });
-  
+
   //end of login blocks
 
   return router;

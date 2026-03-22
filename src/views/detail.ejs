@@ -29,11 +29,12 @@
           </div>
           <div class="write-modal__group">
             <textarea id="taskDescription" class="form-control" name="description"
-              data-initial="<%= data.description || '' %>" placeholder="Description"><%= data.description || '' %></textarea>
+              data-initial="<%= data.description || '' %>"
+              placeholder="Description"><%= data.description || '' %></textarea>
           </div>
           <div class="write-modal__group">
-            <input id="taskDate" type="text" class="form-control" name="date" value="<%= data.date %>"
-              data-initial="<%= data.date %>" placeholder="Date (YYYY-MM-DD)" />
+            <input id="taskDate" type="date" class="form-control" name="date" value="<%= data.date %>"
+              data-initial="<%= data.date %>" required />
           </div>
           <div class="write-modal__group">
             <select id="taskCategory" class="form-control" name="category" required
@@ -55,6 +56,12 @@
     <script>
       const form = document.querySelector('.write-modal__form');
       const saveBtn = document.getElementById('saveBtn');
+      const taskDate = document.getElementById('taskDate');
+      const today = new Date().toISOString().split('T')[0];
+
+      if (taskDate) {
+        taskDate.min = today;
+      }
 
       const updateSaveState = () => {
         const fields = form.querySelectorAll('[data-initial]');
@@ -65,6 +72,20 @@
 
       form.addEventListener('input', updateSaveState);
       form.addEventListener('change', updateSaveState);
+
+      form.addEventListener('submit', (e) => {
+        if (!taskDate.value) {
+          e.preventDefault();
+          alert('Please select a date.');
+          return;
+        }
+
+        if (taskDate.value < today) {
+          e.preventDefault();
+          alert('Date cannot be in the past.');
+        }
+      });
+
       updateSaveState();
     </script>
 </body>

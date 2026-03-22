@@ -218,3 +218,11 @@ button {
   text-decoration: line-through;
   opacity: 0.65;
 }
+
+#taskDate {
+  color: #7a7a7a;
+}
+
+#taskDate:valid {
+  color: #ffffff;
+}
