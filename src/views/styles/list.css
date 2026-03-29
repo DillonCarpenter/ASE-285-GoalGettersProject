@@ -1,13 +1,35 @@
 /* List page layout */
+html.list-page,
+body.list-page {
+	overflow-y: hidden;
+}
+
 .list-group {
 	list-style: none;
-	margin: 2.5rem auto 3rem;
+	margin: 0;
 	padding: 0;
 	width: min(920px, 92vw);
 	display: grid;
 	gap: 1rem;
+	align-content: start;
+	position: fixed;
+	top: 10.25rem;
+	left: 0;
+	right: 0;
+	bottom: 1rem;
+	margin-left: auto;
+	margin-right: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }
 
+.list-group::-webkit-scrollbar {
+	display: none;
+}
 
 .list-group-item {
 	padding: 0.85rem 0.25rem 1.1rem;
@@ -24,6 +46,16 @@
 	border-bottom: none;
 }
 
+/* checkbox on the far left, centered vertically */
+.list-group-item .task-circle {
+	grid-column: 1;
+	grid-row: 1 / span 2;
+	align-self: center;
+	justify-self: start;
+	margin-top: 0;
+}
+
+/* title + badge in the middle column */
 .list-group-item h4 {
 	margin: 0;
 	font-size: 1.2rem;
@@ -33,18 +65,20 @@
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 0.5rem;
-	grid-column: 1;
+	grid-column: 2;
 }
 
+/* date/description in the middle column */
 .list-group-item p {
 	margin: 0;
 	color: #cbd5e1;
 	font-size: 0.95rem;
-	grid-column: 1;
+	grid-column: 2;
 }
 
+/* actions on the far right */
 .list-actions {
-	grid-column: 2;
+	grid-column: 3;
 	grid-row: 1 / span 2;
 	align-self: center;
 	justify-self: end;
@@ -88,7 +122,16 @@
 /* Search bar */
 .search-wrap {
 	width: min(920px, 92vw);
-	margin: 1.5rem auto 0.5rem;
+	margin: 0;
+	position: fixed;
+	top: 5.5rem;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	z-index: 950;
+	background: #181a1b;
+	padding: 0.2rem 0;
 }
 
 #taskSearch {
@@ -203,6 +246,10 @@
 	display: grid;
 	gap: 0.6rem;
 	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+@media (max-width: 768px) {
+	.search-wrap {
+		top: 3.5rem;
+	}
 }
 
 @media (max-width: 640px) {
