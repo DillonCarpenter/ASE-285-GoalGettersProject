@@ -23,14 +23,44 @@ export function createRouter(db) {
     return new ObjectId(value);
   };
 
-  router.get('/', requireCurrentUser, function (req, resp) {
+  router.get('/', requireCurrentUser, async function (req, resp) {
     try {
       if (!req.session.userId) {
         return resp.redirect("/login");
       }
-      resp.render("index")
+
+      const now = new Date();
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+      const userTasks = await posts
+        .find({ userId: req.session.userId })
+        .sort({ _id: -1 })
+        .toArray();
+
+      const todaysTasks = userTasks
+        .filter((task) => {
+          const taskDate = String(task.date || '').trim().slice(0, 10);
+          return taskDate === today;
+        })
+        .slice(0, 5);
+
+      const comingSoonTasks = userTasks
+        .filter((task) => {
+          const taskDate = String(task.date || '').trim().slice(0, 10);
+          return taskDate > today;
+        })
+        .sort((a, b) => {
+          const dateA = String(a.date || '').trim().slice(0, 10);
+          const dateB = String(b.date || '').trim().slice(0, 10);
+          if (dateA !== dateB) return dateA.localeCompare(dateB);
+          return Number(a.completed) - Number(b.completed);
+        })
+        .slice(0, 5);
+
+      resp.render("index", { today, todaysTasks, comingSoonTasks });
     } catch (e) {
       console.error(e);
+      resp.status(500).send('Error loading home page.');
     }
   });
 
