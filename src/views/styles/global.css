@@ -27,20 +27,50 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-top: 5.5rem;
 }
+
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 
 /* Navigation */
 .nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   font-size: 2rem;
-  padding: 1rem;
+  padding: 1rem 0;
+  z-index: 1000;
+  background: rgba(24, 26, 27, 0.96);
 }
 
 .nav__links {
   display: flex;
   gap: 1rem;
   list-style: none;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
+  align-items: center;
+  width: min(920px, 92vw);
+}
+
+.nav__spacer {
+  flex: 1;
+}
+
+.nav-add-task {
+  position: fixed;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  z-index: 1001;
+  padding: 0;
+  margin: 0;
 }
 
 .nav__link {
@@ -48,14 +78,47 @@ body {
   text-decoration: none;
 }
 
-.nav__link:hover {
-  text-decoration: underline;
+.nav__link:hover,
+.nav__link:focus,
+.nav__link:active,
+.nav__link:visited {
+  text-decoration: none;
 }
 
-.username-display{
-  display: flex;
-  justify-content: left;
-  font-size:large;
+@media (max-width: 768px) {
+  body {
+    padding-top: 3.5rem;
+  }
+
+  .nav {
+    font-size: 1rem;
+    padding: 0.75rem 0;
+  }
+
+  .nav__links {
+    gap: 0.55rem;
+    flex-wrap: nowrap;
+  }
+
+  .nav__spacer {
+    display: block;
+    flex: 1;
+  }
+
+  .nav__link {
+    white-space: nowrap;
+  }
+
+  .nav-add-task {
+    right: 0.5rem;
+    bottom: 0.5rem;
+  }
+
+  .btn-add {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
 }
 
 /* Global Button Base */
@@ -151,6 +214,7 @@ button {
   padding:2px 10px;
   border-radius:999px;
   font-size:12px;
+  font-weight: bold;
   margin-left:8px;
   color:#fff;
 }
@@ -176,10 +240,8 @@ button {
   padding: 0;
 }
 
-.task-row{
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.page-fade-up {
+  animation: slideFadeIn 0.4s ease forwards;
 }
 
 .task-circle{
@@ -220,17 +282,3 @@ button {
   opacity: 0.65;
 }
 
-/* Login/Signup page */
-.auth-forms{
-  display: flex;
-  flex-direction: column;
-  justify-content: center; 
-  width: calc(40%); 
-}
-#taskDate {
-  color: #7a7a7a;
-}
-
-#taskDate:valid {
-  color: #ffffff;
-}
