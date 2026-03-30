@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="list-page">
 
 <head>
   <!-- Required meta tags -->
@@ -8,27 +8,95 @@
 
   <link rel="stylesheet" href="styles/global.css" />
   <link rel="stylesheet" href="styles/list.css" />
+  <link rel="stylesheet" href="styles/write.css" />
   <title>List</title>
 </head>
 
-<body>
+<body class="list-page">
   <%- include('nav.ejs') %>
+  <%- include('write.ejs') %>
 
-    <div class="search-wrap">
-      <input type="text" id="taskSearch" class="form-control" placeholder="Search tasks..." />
+    <div class="toolbar page-fade-up">
+      <div class="search-box">
+        <span class="toolbar-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <path d="M20 20L16.65 16.65"></path>
+          </svg>
+        </span>
+
+        <input type="text" id="taskSearch" class="form-control search-input" placeholder="Search tasks..." />
+
+        <button id="sortToggle" class="icon-btn" type="button" title="Sort">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h10"></path>
+            <path d="M8 12h7"></path>
+            <path d="M8 18h4"></path>
+            <path d="M4 6l0 12"></path>
+            <path d="M2.5 16.5L4 18l1.5-1.5"></path>
+          </svg>
+        </button>
+
+        <button id="filterToggle" class="icon-btn" type="button" title="Filter">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6h16"></path>
+            <path d="M7 12h10"></path>
+            <path d="M10 18h4"></path>
+          </svg>
+        </button>
+
+        <button id="clearFiltersBtn" class="icon-btn" type="button" title="Clear all">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18"></path>
+            <path d="M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div id="sortMenu" class="popup-menu" style="display:none;">
+        <select id="sortSelect" class="form-control">
+          <option value="">Sort By</option>
+          <option value="due-asc">Due Date: Soonest to Latest</option>
+          <option value="due-desc">Due Date: Latest to Soonest</option>
+        </select>
+      </div>
+
+      <div id="filterMenu" class="popup-menu" style="display:none;">
+        <select id="categoryFilter" class="form-control">
+          <option value="">All Categories</option>
+          <option value="School">School</option>
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+          <option value="Others">Others</option>
+        </select>
+
+        <select id="statusFilter" class="form-control">
+          <option value="">All Status</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="completed">Completed</option>
+        </select>
+
+        <select id="overdueFilter" class="form-control">
+          <option value="">All Tasks</option>
+          <option value="overdue">Overdue</option>
+          <option value="not-overdue">Not Overdue</option>
+        </select>
+      </div>
     </div>
 
-    <ul class="list-group no-bullets">
+    <ul class="list-group page-fade-up">
       <% for (var i=0; i < posts.length; i++){ %>
         <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>"
           data-title="<%= posts[i].title %>"
           data-category="<%= posts[i].category || 'Personal' %>"
           data-date="<%= posts[i].date || '' %>"
-          data-description="<%= posts[i].description || '' %>">
+          data-description="<%= posts[i].description || '' %>"
+          data-priority="<%= posts[i].priority || '' %>"
+          data-completed="<%= posts[i].completed ? 'true' : 'false' %>">
 
           <!-- Completion toggle -->
-          <button class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>" data-id="<%= posts[i]._id %>"
-            aria-label="Toggle completion">
+          <button type="button" class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>"
+            data-id="<%= posts[i]._id %>" aria-label="Toggle completion">
           </button>
 
           <h4>
@@ -38,6 +106,11 @@
             <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
               <%= posts[i].category || "Personal" %>
             </span>
+            <% if (posts[i].priority) { %>
+              <span class="priority-badge priority-<%= posts[i].priority.toLowerCase() %>">
+                <%= posts[i].priority %>
+              </span>
+            <% } %>
           </h4>
 
           <p>
@@ -83,8 +156,10 @@
           window.location.href = `/detail/${id}`;
           return;
         }
+
         //2.) Task status
         if (e.target.classList.contains("task-circle")) {
+          e.preventDefault();
           const id = e.target.dataset.id;
 
           try {
@@ -101,6 +176,9 @@
             const title = li.querySelector(".task-title");
 
             e.target.classList.toggle("is-complete", data.completed);
+            li.dataset.completed = data.completed ? "true" : "false";
+            li.classList.toggle("task-completed", data.completed);
+
             if (title) {
               title.classList.toggle("task-title-complete", data.completed);
             }
@@ -109,6 +187,7 @@
           }
           return;
         }
+
         //3.) Delete button
         const deleteButton = e.target.closest(".delete");
         if (!deleteButton) return;
@@ -123,33 +202,128 @@
 
           if (!res.ok) throw new Error("Request failed");
 
-          // Remove parent <li> immediately so the list reflows
           const li = deleteButton.closest("li");
           li.remove();
-
-          console.log("killed");
         } catch (err) {
           console.error(err);
         }
       });
 
       const searchInput = document.getElementById("taskSearch");
+      const sortToggle = document.getElementById("sortToggle");
+      const filterToggle = document.getElementById("filterToggle");
+      const sortMenu = document.getElementById("sortMenu");
+      const filterMenu = document.getElementById("filterMenu");
+      const sortSelect = document.getElementById("sortSelect");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const statusFilter = document.getElementById("statusFilter");
+      const overdueFilter = document.getElementById("overdueFilter");
+      const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+      const taskList = document.querySelector(".list-group");
 
-      if (searchInput) {
-        searchInput.addEventListener("input", () => {
-          const value = searchInput.value.toLowerCase().trim();
-          const tasks = document.querySelectorAll(".list-group-item");
+      function parseDateValue(dateString) {
+        if (!dateString) return null;
+        const parsed = new Date(dateString + "T00:00:00");
+        return isNaN(parsed.getTime()) ? null : parsed;
+      }
 
-          tasks.forEach((task) => {
-            const text = [
-              task.dataset.title,
-              task.dataset.category,
-              task.dataset.date,
-              task.dataset.description
-            ].join(" ").toLowerCase();
+      function applyFiltersAndSort() {
+        const searchValue = (searchInput?.value || "").toLowerCase().trim();
+        const categoryValue = categoryFilter?.value || "";
+        const statusValue = statusFilter?.value || "";
+        const overdueValue = overdueFilter?.value || "";
+        const sortValue = sortSelect?.value || "";
 
-            task.style.display = text.includes(value) ? "" : "none";
-          });
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const tasks = Array.from(document.querySelectorAll(".list-group-item"));
+
+        tasks.forEach((task) => {
+          const title = (task.dataset.title || "").toLowerCase();
+          const category = task.dataset.category || "";
+          const date = task.dataset.date || "";
+          const description = (task.dataset.description || "").toLowerCase();
+          const completed = task.dataset.completed === "true";
+
+          const searchText = [title, category.toLowerCase(), date.toLowerCase(), description].join(" ");
+          const matchesSearch = searchText.includes(searchValue);
+          const matchesCategory = !categoryValue || category === categoryValue;
+          const matchesStatus =
+            !statusValue ||
+            (statusValue === "completed" && completed) ||
+            (statusValue === "incomplete" && !completed);
+
+          const taskDate = parseDateValue(date);
+          const isOverdue = taskDate ? taskDate < today && !completed : false;
+
+          const matchesOverdue =
+            !overdueValue ||
+            (overdueValue === "overdue" && isOverdue) ||
+            (overdueValue === "not-overdue" && !isOverdue);
+
+          task.style.display =
+            matchesSearch && matchesCategory && matchesStatus && matchesOverdue ? "" : "none";
+        });
+
+        const visibleTasks = tasks.filter((task) => task.style.display !== "none");
+
+        visibleTasks.sort((a, b) => {
+          if (sortValue === "due-asc" || sortValue === "due-desc") {
+            const aDate = parseDateValue(a.dataset.date);
+            const bDate = parseDateValue(b.dataset.date);
+
+            const aTime = aDate ? aDate.getTime() : Number.MAX_SAFE_INTEGER;
+            const bTime = bDate ? bDate.getTime() : Number.MAX_SAFE_INTEGER;
+
+            return sortValue === "due-asc" ? aTime - bTime : bTime - aTime;
+          }
+
+          return 0;
+        });
+
+        visibleTasks.forEach((task) => taskList.appendChild(task));
+      }
+
+      if (sortToggle) {
+        sortToggle.addEventListener("click", () => {
+          const isOpen = sortMenu.style.display === "grid";
+          sortMenu.style.display = isOpen ? "none" : "grid";
+          filterMenu.style.display = "none";
+        });
+      }
+
+      if (filterToggle) {
+        filterToggle.addEventListener("click", () => {
+          const isOpen = filterMenu.style.display === "grid";
+          filterMenu.style.display = isOpen ? "none" : "grid";
+          sortMenu.style.display = "none";
+        });
+      }
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".toolbar")) {
+          sortMenu.style.display = "none";
+          filterMenu.style.display = "none";
+        }
+      });
+
+      if (searchInput) searchInput.addEventListener("input", applyFiltersAndSort);
+      if (sortSelect) sortSelect.addEventListener("change", applyFiltersAndSort);
+      if (categoryFilter) categoryFilter.addEventListener("change", applyFiltersAndSort);
+      if (statusFilter) statusFilter.addEventListener("change", applyFiltersAndSort);
+      if (overdueFilter) overdueFilter.addEventListener("change", applyFiltersAndSort);
+
+      if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener("click", () => {
+          if (searchInput) searchInput.value = "";
+          if (sortSelect) sortSelect.value = "";
+          if (categoryFilter) categoryFilter.value = "";
+          if (statusFilter) statusFilter.value = "";
+          if (overdueFilter) overdueFilter.value = "";
+          sortMenu.style.display = "none";
+          filterMenu.style.display = "none";
+          applyFiltersAndSort();
         });
       }
     </script>
