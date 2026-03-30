@@ -29,14 +29,14 @@ theme: default
 ---
 ## Sort & Filter Tasks
 - Users can sort tasks by:
-- Due date (Soonest to Latest, Latest or Soonest)
+- Due date (Soonest to Latest, Latest or Soonest) 
 - Priority (High to Low, Low to High)
 ---
 - Users can filter tasks by:
-- Category (e.g., School only)
+- Category (e.g., School only) - Completed
 - Priority (e.g., High only)
 - Status (Completed or Incomplete) and Overdue
-- Sort and filter can be combined (e.g., Category = Work and Sort by due date).
+- Sort and filter can be combined (e.g., Category = Work and Sort by due date). - Completed
 - Users can clear all filters.
 ---
 ## TASK CRUD
@@ -58,8 +58,8 @@ theme: default
 ---
 ## Improved Navigation
 
-- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). - In Progress
-- All views must be functionally routed using the frontend routing system. - In Progress
+- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). - Completed
+- All views must be functionally routed using the frontend routing system. - Completed
 - Navigation actions shall not cause unnecessary page reloads. - Completed
 ---
 ## Calendar View for Tasks
@@ -84,7 +84,6 @@ Requirements:
 ## Search bar
 Requirements:
 - search bar element that takes user input - Completed
-- search filtering option that allows user to search within a certain tag
 - option to Clear Search that clears the search bar and resets the search results - Completed
 ---
 # Data Model and Architecture
