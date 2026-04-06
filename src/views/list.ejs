@@ -27,7 +27,8 @@
 
         <input type="text" id="taskSearch" class="form-control search-input" placeholder="Search tasks..." />
 
-        <button id="sortToggle" class="icon-btn" type="button" title="Sort">
+        <button id="sortToggle" class="icon-btn" type="button" title="Sort by due date: Soonest to Latest"
+          aria-label="Sort by due date: Soonest to Latest">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 6h10"></path>
             <path d="M8 12h7"></path>
@@ -53,13 +54,15 @@
         </button>
       </div>
 
-      <div id="sortMenu" class="popup-menu" style="display:none;">
-        <select id="sortSelect" class="form-control">
-          <option value="">Sort By</option>
-          <option value="due-asc">Due Date: Soonest to Latest</option>
-          <option value="due-desc">Due Date: Latest to Soonest</option>
-        </select>
-      </div>
+      <button id="calendarToggle" class="icon-btn toolbar-calendar-btn" type="button" title="Switch to calendar view"
+        aria-label="Switch to calendar view">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+          <path d="M16 3v4"></path>
+          <path d="M8 3v4"></path>
+          <path d="M3 10h18"></path>
+        </svg>
+      </button>
 
       <div id="filterMenu" class="popup-menu" style="display:none;">
         <select id="categoryFilter" class="form-control">
@@ -87,6 +90,7 @@
     <ul class="list-group page-fade-up">
       <% for (var i=0; i < posts.length; i++){ %>
         <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>"
+          data-id="<%= posts[i]._id %>"
           data-title="<%= posts[i].title %>"
           data-category="<%= posts[i].category || 'Personal' %>"
           data-date="<%= posts[i].date || '' %>"
@@ -147,79 +151,47 @@
         <% } %>
     </ul>
 
+    <section id="calendarView" class="calendar-view page-fade-up" style="display:none;">
+      <div class="calendar-header">
+        <button id="calendarPrev" class="calendar-nav-btn" type="button" aria-label="Previous month">&#x2039;</button>
+        <h3 id="calendarMonthLabel" class="calendar-month-label"></h3>
+        <button id="calendarNext" class="calendar-nav-btn" type="button" aria-label="Next month">&#x203A;</button>
+      </div>
+
+      <div class="calendar-weekdays">
+        <span>Sun</span>
+        <span>Mon</span>
+        <span>Tue</span>
+        <span>Wed</span>
+        <span>Thu</span>
+        <span>Fri</span>
+        <span>Sat</span>
+      </div>
+
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
+
     <script>
-      document.addEventListener("click", async (e) => {
-        //1.) Edit button
-        const editButton = e.target.closest(".edit");
-        if (editButton) {
-          const id = editButton.dataset.id;
-          window.location.href = `/detail/${id}`;
-          return;
-        }
-
-        //2.) Task status
-        if (e.target.classList.contains("task-circle")) {
-          e.preventDefault();
-          const id = e.target.dataset.id;
-
-          try {
-            const res = await fetch("/toggle-complete", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ _id: id })
-            });
-
-            if (!res.ok) throw new Error("Toggle failed");
-            const data = await res.json();
-
-            const li = e.target.closest("li");
-            const title = li.querySelector(".task-title");
-
-            e.target.classList.toggle("is-complete", data.completed);
-            li.dataset.completed = data.completed ? "true" : "false";
-            li.classList.toggle("task-completed", data.completed);
-
-            if (title) {
-              title.classList.toggle("task-title-complete", data.completed);
-            }
-          } catch (err) {
-            console.error(err);
-          }
-          return;
-        }
-
-        //3.) Delete button
-        const deleteButton = e.target.closest(".delete");
-        if (!deleteButton) return;
-        const id = deleteButton.dataset.id;
-
-        try {
-          const res = await fetch("/delete", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ _id: id })
-          });
-
-          if (!res.ok) throw new Error("Request failed");
-
-          const li = deleteButton.closest("li");
-          li.remove();
-        } catch (err) {
-          console.error(err);
-        }
-      });
-
       const searchInput = document.getElementById("taskSearch");
       const sortToggle = document.getElementById("sortToggle");
       const filterToggle = document.getElementById("filterToggle");
-      const sortMenu = document.getElementById("sortMenu");
+      const calendarToggle = document.getElementById("calendarToggle");
       const filterMenu = document.getElementById("filterMenu");
-      const sortSelect = document.getElementById("sortSelect");
       const categoryFilter = document.getElementById("categoryFilter");
       const statusFilter = document.getElementById("statusFilter");
       const overdueFilter = document.getElementById("overdueFilter");
       const clearFiltersBtn = document.getElementById("clearFiltersBtn");
       const taskList = document.querySelector(".list-group");
+      const calendarView = document.getElementById("calendarView");
+      const calendarPrev = document.getElementById("calendarPrev");
+      const calendarNext = document.getElementById("calendarNext");
+      const calendarMonthLabel = document.getElementById("calendarMonthLabel");
+      const calendarGrid = document.getElementById("calendarGrid");
+
+      let sortValue = "";
+      let isCalendarView = false;
+      const calendarMonth = new Date();
+      calendarMonth.setDate(1);
 
       function parseDateValue(dateString) {
         if (!dateString) return null;
@@ -227,12 +199,152 @@
         return isNaN(parsed.getTime()) ? null : parsed;
       }
 
+      function getVisibleTasks() {
+        return Array.from(document.querySelectorAll(".list-group-item")).filter((task) => task.style.display !== "none");
+      }
+
+      function updateSortToggleLabel() {
+        if (!sortToggle) return;
+        const label = sortValue === "due-desc"
+          ? "Sort by due date: Latest to Soonest"
+          : "Sort by due date: Soonest to Latest";
+
+        sortToggle.title = label;
+        sortToggle.setAttribute("aria-label", label);
+      }
+
+      function updateCalendarToggleLabel() {
+        if (!calendarToggle) return;
+
+        const label = isCalendarView ? "Switch to list view" : "Switch to calendar view";
+        calendarToggle.title = label;
+        calendarToggle.setAttribute("aria-label", label);
+      }
+
+      function openTaskCreationForDate(year, month, day) {
+        const modal = document.getElementById("navWriteModal");
+        const dateInput = document.getElementById("navTaskDate");
+        const titleInput = document.getElementById("navTaskTitle");
+
+        if (!modal || !dateInput) return;
+
+        const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+        dateInput.value = dateStr;
+
+        if (titleInput) titleInput.value = "";
+        if (titleInput) titleInput.focus();
+
+        modal.style.display = "flex";
+      }
+
+      function renderCalendar(tasks) {
+        if (!calendarGrid || !calendarMonthLabel) return;
+
+        const year = calendarMonth.getFullYear();
+        const month = calendarMonth.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startOffset = firstDay.getDay();
+        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+        const tasksByDay = new Map();
+        tasks.forEach((task) => {
+          const date = parseDateValue(task.dataset.date);
+          if (!date) return;
+          if (date.getFullYear() !== year || date.getMonth() !== month) return;
+
+          const day = date.getDate();
+          const entries = tasksByDay.get(day) || [];
+          entries.push({
+            id: task.dataset.id || "",
+            title: task.dataset.title || "Untitled",
+            category: task.dataset.category || "Personal",
+            completed: task.dataset.completed === "true"
+          });
+          tasksByDay.set(day, entries);
+        });
+
+        calendarMonthLabel.textContent = firstDay.toLocaleString(undefined, {
+          month: "long",
+          year: "numeric"
+        });
+
+        calendarGrid.innerHTML = "";
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let cellIndex = 0; cellIndex < totalCells; cellIndex += 1) {
+          const dayNumber = cellIndex - startOffset + 1;
+          const cell = document.createElement("div");
+          cell.className = "calendar-cell";
+
+          if (dayNumber < 1 || dayNumber > daysInMonth) {
+            cell.classList.add("calendar-cell-empty");
+            calendarGrid.appendChild(cell);
+            continue;
+          }
+
+          const cellDate = new Date(year, month, dayNumber);
+          if (cellDate.getTime() === today.getTime()) {
+            cell.classList.add("calendar-cell-today");
+          }
+
+          const dayLabel = document.createElement("button");
+          dayLabel.type = "button";
+          dayLabel.className = "calendar-day-number";
+          dayLabel.textContent = String(dayNumber);
+          dayLabel.title = `Create task for ${cellDate.toLocaleDateString()}`;
+          dayLabel.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openTaskCreationForDate(year, month, dayNumber);
+          });
+          cell.appendChild(dayLabel);
+
+          const dayTasks = tasksByDay.get(dayNumber) || [];
+          dayTasks.slice(0, 3).forEach((task) => {
+            const taskChip = document.createElement("button");
+            taskChip.type = "button";
+            taskChip.className = `calendar-task-chip${task.completed ? " is-complete" : ""}`;
+            taskChip.textContent = task.title;
+            taskChip.title = `${task.title} (${task.category})`;
+
+            taskChip.addEventListener("click", () => {
+              if (task.id) {
+                window.location.href = `/detail/${task.id}`;
+              }
+            });
+
+            cell.appendChild(taskChip);
+          });
+
+          if (dayTasks.length > 3) {
+            const extraLabel = document.createElement("div");
+            extraLabel.className = "calendar-task-more";
+            extraLabel.textContent = `+${dayTasks.length - 3} more`;
+            cell.appendChild(extraLabel);
+          }
+
+          calendarGrid.appendChild(cell);
+        }
+      }
+
+      function setCalendarView(enabled) {
+        isCalendarView = enabled;
+        if (taskList) taskList.style.display = isCalendarView ? "none" : "grid";
+        if (calendarView) calendarView.style.display = isCalendarView ? "flex" : "none";
+        updateCalendarToggleLabel();
+
+        if (isCalendarView) {
+          renderCalendar(getVisibleTasks());
+        }
+      }
+
       function applyFiltersAndSort() {
         const searchValue = (searchInput?.value || "").toLowerCase().trim();
         const categoryValue = categoryFilter?.value || "";
         const statusValue = statusFilter?.value || "";
         const overdueValue = overdueFilter?.value || "";
-        const sortValue = sortSelect?.value || "";
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -283,13 +395,75 @@
         });
 
         visibleTasks.forEach((task) => taskList.appendChild(task));
+        renderCalendar(visibleTasks);
       }
+
+      document.addEventListener("click", async (e) => {
+        const editButton = e.target.closest(".edit");
+        if (editButton) {
+          const id = editButton.dataset.id;
+          window.location.href = `/detail/${id}`;
+          return;
+        }
+
+        if (e.target.classList.contains("task-circle")) {
+          e.preventDefault();
+          const id = e.target.dataset.id;
+
+          try {
+            const res = await fetch("/toggle-complete", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ _id: id })
+            });
+
+            if (!res.ok) throw new Error("Toggle failed");
+            const data = await res.json();
+
+            const li = e.target.closest("li");
+            const title = li.querySelector(".task-title");
+
+            e.target.classList.toggle("is-complete", data.completed);
+            li.dataset.completed = data.completed ? "true" : "false";
+            li.classList.toggle("task-completed", data.completed);
+
+            if (title) {
+              title.classList.toggle("task-title-complete", data.completed);
+            }
+
+            applyFiltersAndSort();
+          } catch (err) {
+            console.error(err);
+          }
+          return;
+        }
+
+        const deleteButton = e.target.closest(".delete");
+        if (!deleteButton) return;
+        const id = deleteButton.dataset.id;
+
+        try {
+          const res = await fetch("/delete", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ _id: id })
+          });
+
+          if (!res.ok) throw new Error("Request failed");
+
+          const li = deleteButton.closest("li");
+          li.remove();
+          applyFiltersAndSort();
+        } catch (err) {
+          console.error(err);
+        }
+      });
 
       if (sortToggle) {
         sortToggle.addEventListener("click", () => {
-          const isOpen = sortMenu.style.display === "grid";
-          sortMenu.style.display = isOpen ? "none" : "grid";
-          filterMenu.style.display = "none";
+          sortValue = sortValue === "due-asc" ? "due-desc" : "due-asc";
+          updateSortToggleLabel();
+          applyFiltersAndSort();
         });
       }
 
@@ -297,19 +471,37 @@
         filterToggle.addEventListener("click", () => {
           const isOpen = filterMenu.style.display === "grid";
           filterMenu.style.display = isOpen ? "none" : "grid";
-          sortMenu.style.display = "none";
+        });
+      }
+
+      if (calendarToggle) {
+        calendarToggle.addEventListener("click", () => {
+          filterMenu.style.display = "none";
+          setCalendarView(!isCalendarView);
+        });
+      }
+
+      if (calendarPrev) {
+        calendarPrev.addEventListener("click", () => {
+          calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+          renderCalendar(getVisibleTasks());
+        });
+      }
+
+      if (calendarNext) {
+        calendarNext.addEventListener("click", () => {
+          calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+          renderCalendar(getVisibleTasks());
         });
       }
 
       document.addEventListener("click", (e) => {
         if (!e.target.closest(".toolbar")) {
-          sortMenu.style.display = "none";
           filterMenu.style.display = "none";
         }
       });
 
       if (searchInput) searchInput.addEventListener("input", applyFiltersAndSort);
-      if (sortSelect) sortSelect.addEventListener("change", applyFiltersAndSort);
       if (categoryFilter) categoryFilter.addEventListener("change", applyFiltersAndSort);
       if (statusFilter) statusFilter.addEventListener("change", applyFiltersAndSort);
       if (overdueFilter) overdueFilter.addEventListener("change", applyFiltersAndSort);
@@ -317,15 +509,19 @@
       if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener("click", () => {
           if (searchInput) searchInput.value = "";
-          if (sortSelect) sortSelect.value = "";
+          sortValue = "";
+          updateSortToggleLabel();
           if (categoryFilter) categoryFilter.value = "";
           if (statusFilter) statusFilter.value = "";
           if (overdueFilter) overdueFilter.value = "";
-          sortMenu.style.display = "none";
           filterMenu.style.display = "none";
           applyFiltersAndSort();
         });
       }
+
+      updateSortToggleLabel();
+      updateCalendarToggleLabel();
+      applyFiltersAndSort();
     </script>
 
 </body>

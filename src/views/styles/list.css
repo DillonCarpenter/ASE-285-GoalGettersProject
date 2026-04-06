@@ -13,6 +13,7 @@ body.list-page {
 	gap: 1rem;
 	align-content: start;
 	position: fixed;
+	z-index: 1;
 	top: 10.25rem;
 	left: 0;
 	right: 0;
@@ -159,8 +160,33 @@ body.list-page {
 /* Modern toolbar */
 .toolbar {
 	width: min(920px, 92vw);
-	margin: 1.25rem auto 0.75rem;
+	margin: 0.55rem auto 0.2rem;
 	position: relative;
+	z-index: 1002;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 36px;
+	align-items: center;
+	gap: 0;
+}
+
+.toolbar-calendar-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	margin-left: 0;
+	border: none;
+	border-radius: 10px;
+	background: transparent;
+	color: #8b949e;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.toolbar-calendar-btn:hover {
+	background: #1b2128;
+	color: #ffffff;
 }
 
 .search-box {
@@ -235,8 +261,9 @@ body.list-page {
 
 .popup-menu {
 	position: absolute;
+	top: 100%;
 	right: 0;
-	z-index: 20;
+	z-index: 1003;
 	width: 260px;
 	margin-top: 0.55rem;
 	padding: 0.75rem;
@@ -246,6 +273,164 @@ body.list-page {
 	display: grid;
 	gap: 0.6rem;
 	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.calendar-view {
+	position: fixed;
+	top: 10.25rem;
+	left: 0;
+	right: 0;
+	bottom: 1rem;
+	width: min(920px, 92vw);
+	margin-left: auto;
+	margin-right: auto;
+	padding: 0.9rem;
+	border: 1px solid #2f3338;
+	border-radius: 14px;
+	background: #111418;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	z-index: 1;
+}
+
+.calendar-view::-webkit-scrollbar {
+	display: none;
+}
+
+.calendar-header {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.8rem;
+}
+
+.calendar-month-label {
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 700;
+	text-align: center;
+	letter-spacing: 0.2px;
+}
+
+.calendar-nav-btn {
+	width: 34px;
+	height: 34px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 9px;
+	background: #1b2128;
+	color: #ffffff;
+	cursor: pointer;
+	font-size: 1.2rem;
+	line-height: 1;
+	transition: background 0.2s ease;
+}
+
+.calendar-nav-btn:hover {
+	background: #2a3340;
+}
+
+.calendar-weekdays {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 0.5rem;
+	margin-bottom: 0.5rem;
+	color: #8b949e;
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.35px;
+}
+
+.calendar-weekdays span {
+	text-align: right;
+	padding-right: 0.25rem;
+}
+
+.calendar-grid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	grid-template-rows: repeat(6, minmax(0, 1fr));
+	flex: 1;
+	min-height: 0;
+	gap: 0.5rem;
+}
+
+.calendar-cell {
+	min-height: 0;
+	padding: 0.45rem;
+	border: 1px solid #2f3338;
+	border-radius: 12px;
+	background: #181d24;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	overflow: hidden;
+}
+
+.calendar-cell-empty {
+	background: transparent;
+	border-color: #1e242c;
+	opacity: 0.35;
+}
+
+.calendar-cell-today {
+	border-color: #6c63ff;
+	box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2) inset;
+}
+
+.calendar-day-number {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: #f1f5f9;
+	text-align: right;
+	margin-bottom: 0.1rem;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	transition: color 0.2s ease;
+}
+
+.calendar-day-number:hover {
+	color: #6c63ff;
+}
+
+.calendar-task-chip {
+	width: 100%;
+	text-align: left;
+	padding: 0.35rem 0.45rem;
+	border-radius: 8px;
+	background: #263243;
+	color: #dbe7f5;
+	font-size: 0.76rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	transition: background 0.2s ease;
+}
+
+.calendar-task-chip:hover {
+	background: #33455d;
+}
+
+.calendar-task-chip.is-complete {
+	background: #1f3d2c;
+	color: #c3f2d3;
+	text-decoration: line-through;
+}
+
+.calendar-task-more {
+	margin-top: auto;
+	font-size: 0.75rem;
+	color: #8b949e;
+	text-align: right;
+}
+
 @media (max-width: 768px) {
 	.search-wrap {
 		top: 3.5rem;
@@ -268,5 +453,28 @@ body.list-page {
 
 	.popup-menu {
 		width: 100%;
+	}
+
+	.calendar-view {
+		padding: 0.65rem;
+	}
+
+	.calendar-weekdays {
+		gap: 0.25rem;
+		font-size: 0.7rem;
+	}
+
+	.calendar-grid {
+		gap: 0.25rem;
+	}
+
+	.calendar-cell {
+		min-height: 0;
+		padding: 0.35rem;
+	}
+
+	.calendar-task-chip {
+		font-size: 0.68rem;
+		padding: 0.3rem 0.35rem;
 	}
 }
