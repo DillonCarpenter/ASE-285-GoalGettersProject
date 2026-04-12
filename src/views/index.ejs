@@ -74,7 +74,8 @@
       const greetingEl = document.getElementById('homeGreeting');
       if (!greetingEl) return;
 
-      const username = "<%= currentUser?.username || '' %>".trim() || "there";
+      const usernameRaw = "<%= currentUser?.username || '' %>".trim() || "there";
+      const username = usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1);
       const hour = new Date().getHours();
       const greeting = hour < 12 ? "Good morning" : "Good afternoon";
 

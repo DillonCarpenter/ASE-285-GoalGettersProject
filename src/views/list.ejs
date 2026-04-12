@@ -187,6 +187,7 @@
       const calendarNext = document.getElementById("calendarNext");
       const calendarMonthLabel = document.getElementById("calendarMonthLabel");
       const calendarGrid = document.getElementById("calendarGrid");
+      const listViewModeStorageKey = "goalgetters:list-view-mode";
 
       let sortValue = "";
       let isCalendarView = false;
@@ -199,8 +200,41 @@
         return isNaN(parsed.getTime()) ? null : parsed;
       }
 
+      function buildTaskSearchText(task) {
+        const title = (task.dataset.title || "").toLowerCase();
+        const category = (task.dataset.category || "").toLowerCase();
+        const date = (task.dataset.date || "").toLowerCase();
+        const description = (task.dataset.description || "").toLowerCase();
+        return [title, category, date, description].join(" ");
+      }
+
+      function syncCalendarMonthToSearchResults(tasks, searchValue) {
+        if (!searchValue || !tasks.length) return;
+
+        const currentYear = calendarMonth.getFullYear();
+        const currentMonth = calendarMonth.getMonth();
+        const hasResultInCurrentMonth = tasks.some((task) => {
+          const taskDate = parseDateValue(task.dataset.date);
+          return taskDate && taskDate.getFullYear() === currentYear && taskDate.getMonth() === currentMonth;
+        });
+
+        if (hasResultInCurrentMonth) return;
+
+        let targetDate = null;
+        for (const task of tasks) {
+          const parsedDate = parseDateValue(task.dataset.date);
+          if (parsedDate) {
+            targetDate = parsedDate;
+            break;
+          }
+        }
+        if (!targetDate) return;
+
+        calendarMonth.setFullYear(targetDate.getFullYear(), targetDate.getMonth(), 1);
+      }
+
       function getVisibleTasks() {
-        return Array.from(document.querySelectorAll(".list-group-item")).filter((task) => task.style.display !== "none");
+        return Array.from(document.querySelectorAll(".list-group-item"));
       }
 
       function updateSortToggleLabel() {
@@ -217,8 +251,25 @@
         if (!calendarToggle) return;
 
         const label = isCalendarView ? "Switch to list view" : "Switch to calendar view";
+        const iconSvg = isCalendarView
+          ? `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 6h13"></path>
+              <path d="M8 12h13"></path>
+              <path d="M8 18h13"></path>
+              <circle cx="4" cy="6" r="1"></circle>
+              <circle cx="4" cy="12" r="1"></circle>
+              <circle cx="4" cy="18" r="1"></circle>
+            </svg>`
+          : `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+              <path d="M16 3v4"></path>
+              <path d="M8 3v4"></path>
+              <path d="M3 10h18"></path>
+            </svg>`;
+
         calendarToggle.title = label;
         calendarToggle.setAttribute("aria-label", label);
+        calendarToggle.innerHTML = iconSvg;
       }
 
       function openTaskCreationForDate(year, month, day) {
@@ -246,6 +297,8 @@
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startOffset = firstDay.getDay();
         const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+        const weekRows = totalCells / 7;
+        const maxVisibleTaskChips = weekRows <= 4 ? 5 : weekRows === 5 ? 4 : 3;
 
         const tasksByDay = new Map();
         tasks.forEach((task) => {
@@ -259,7 +312,8 @@
             id: task.dataset.id || "",
             title: task.dataset.title || "Untitled",
             category: task.dataset.category || "Personal",
-            completed: task.dataset.completed === "true"
+            completed: task.dataset.completed === "true",
+            isFilterMatch: task.dataset.filterMatch === "true"
           });
           tasksByDay.set(day, entries);
         });
@@ -270,6 +324,7 @@
         });
 
         calendarGrid.innerHTML = "";
+        calendarGrid.style.gridTemplateRows = `repeat(${weekRows}, minmax(0, 1fr))`;
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -290,26 +345,40 @@
             cell.classList.add("calendar-cell-today");
           }
 
-          const dayLabel = document.createElement("button");
-          dayLabel.type = "button";
+          const openCreateModal = () => openTaskCreationForDate(year, month, dayNumber);
+          cell.classList.add("calendar-day-cell");
+          cell.title = `Create task for ${cellDate.toLocaleDateString()}`;
+          cell.setAttribute("role", "button");
+          cell.tabIndex = 0;
+          cell.setAttribute("aria-label", `Create task for ${cellDate.toLocaleDateString()}`);
+          cell.addEventListener("click", openCreateModal);
+          cell.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openCreateModal();
+            }
+          });
+
+          const dayLabel = document.createElement("div");
           dayLabel.className = "calendar-day-number";
           dayLabel.textContent = String(dayNumber);
-          dayLabel.title = `Create task for ${cellDate.toLocaleDateString()}`;
-          dayLabel.addEventListener("click", (e) => {
-            e.stopPropagation();
-            openTaskCreationForDate(year, month, dayNumber);
-          });
           cell.appendChild(dayLabel);
 
           const dayTasks = tasksByDay.get(dayNumber) || [];
-          dayTasks.slice(0, 3).forEach((task) => {
+          if (dayTasks.some((task) => task.isFilterMatch)) {
+            cell.classList.add("calendar-cell-has-match");
+          }
+
+          dayTasks.slice(0, maxVisibleTaskChips).forEach((task) => {
             const taskChip = document.createElement("button");
+            const categoryClass = `cat-${(task.category || "personal").toLowerCase()}`;
             taskChip.type = "button";
-            taskChip.className = `calendar-task-chip${task.completed ? " is-complete" : ""}`;
+            taskChip.className = `calendar-task-chip ${categoryClass}${task.completed ? " is-complete" : ""}`;
             taskChip.textContent = task.title;
             taskChip.title = `${task.title} (${task.category})`;
 
-            taskChip.addEventListener("click", () => {
+            taskChip.addEventListener("click", (e) => {
+              e.stopPropagation();
               if (task.id) {
                 window.location.href = `/detail/${task.id}`;
               }
@@ -318,10 +387,10 @@
             cell.appendChild(taskChip);
           });
 
-          if (dayTasks.length > 3) {
+          if (dayTasks.length > maxVisibleTaskChips) {
             const extraLabel = document.createElement("div");
             extraLabel.className = "calendar-task-more";
-            extraLabel.textContent = `+${dayTasks.length - 3} more`;
+            extraLabel.textContent = `+${dayTasks.length - maxVisibleTaskChips} more`;
             cell.appendChild(extraLabel);
           }
 
@@ -334,6 +403,7 @@
         if (taskList) taskList.style.display = isCalendarView ? "none" : "grid";
         if (calendarView) calendarView.style.display = isCalendarView ? "flex" : "none";
         updateCalendarToggleLabel();
+        localStorage.setItem(listViewModeStorageKey, isCalendarView ? "calendar" : "list");
 
         if (isCalendarView) {
           renderCalendar(getVisibleTasks());
@@ -345,6 +415,7 @@
         const categoryValue = categoryFilter?.value || "";
         const statusValue = statusFilter?.value || "";
         const overdueValue = overdueFilter?.value || "";
+        const hasActiveToolbarFilter = Boolean(searchValue || categoryValue || statusValue || overdueValue || sortValue);
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -352,13 +423,11 @@
         const tasks = Array.from(document.querySelectorAll(".list-group-item"));
 
         tasks.forEach((task) => {
-          const title = (task.dataset.title || "").toLowerCase();
           const category = task.dataset.category || "";
           const date = task.dataset.date || "";
-          const description = (task.dataset.description || "").toLowerCase();
           const completed = task.dataset.completed === "true";
 
-          const searchText = [title, category.toLowerCase(), date.toLowerCase(), description].join(" ");
+          const searchText = buildTaskSearchText(task);
           const matchesSearch = searchText.includes(searchValue);
           const matchesCategory = !categoryValue || category === categoryValue;
           const matchesStatus =
@@ -374,13 +443,15 @@
             (overdueValue === "overdue" && isOverdue) ||
             (overdueValue === "not-overdue" && !isOverdue);
 
-          task.style.display =
-            matchesSearch && matchesCategory && matchesStatus && matchesOverdue ? "" : "none";
+          const isMatch = hasActiveToolbarFilter && matchesSearch && matchesCategory && matchesStatus && matchesOverdue;
+          task.dataset.filterMatch = isMatch ? "true" : "false";
+          task.classList.toggle("is-search-match", isMatch);
         });
 
-        const visibleTasks = tasks.filter((task) => task.style.display !== "none");
+        const matchingTasks = tasks.filter((task) => task.dataset.filterMatch === "true");
+        const orderedTasks = [...tasks];
 
-        visibleTasks.sort((a, b) => {
+        orderedTasks.sort((a, b) => {
           if (sortValue === "due-asc" || sortValue === "due-desc") {
             const aDate = parseDateValue(a.dataset.date);
             const bDate = parseDateValue(b.dataset.date);
@@ -394,8 +465,9 @@
           return 0;
         });
 
-        visibleTasks.forEach((task) => taskList.appendChild(task));
-        renderCalendar(visibleTasks);
+        syncCalendarMonthToSearchResults(matchingTasks, searchValue);
+        orderedTasks.forEach((task) => taskList.appendChild(task));
+        renderCalendar(orderedTasks);
       }
 
       document.addEventListener("click", async (e) => {
@@ -522,6 +594,11 @@
       updateSortToggleLabel();
       updateCalendarToggleLabel();
       applyFiltersAndSort();
+
+      const savedViewMode = localStorage.getItem(listViewModeStorageKey);
+      if (savedViewMode === "calendar") {
+        setCalendarView(true);
+      }
     </script>
 
 </body>
