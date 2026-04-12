@@ -29,18 +29,18 @@ theme: default
 ---
 ## Sort & Filter Tasks
 - Users can sort tasks by:
-- Due date (Soonest to Latest, Latest or Soonest)
-- Priority (High to Low, Low to High)
+- Due date (Soonest to Latest, Latest or Soonest)  - Completed
+- Priority (High to Low, Low to High) - Completed
 ---
 - Users can filter tasks by:
-- Category (e.g., School only)
+- Category (e.g., School only) - Completed
 - Priority (e.g., High only)
-- Status (Completed or Incomplete) and Overdue
-- Sort and filter can be combined (e.g., Category = Work and Sort by due date).
-- Users can clear all filters.
+- Status (Completed or Incomplete) and Overdue - Completed
+- Sort and filter can be combined (e.g., Category = Work and Sort by due date). - Completed
+- Users can clear all filters. - Completed
 ---
 ## TASK CRUD
-- The system shall integrate with a database to allow users to create, edit, and delete posts. - Compled
+- The system shall integrate with a database to allow users to create, edit, and delete posts. - Completed
 - The frontend shall provide input forms that allow users to submit and update post data. - Completed
 - Changes made to posts shall be reflected in real time or upon refresh. - Completed
 ---
@@ -58,18 +58,17 @@ theme: default
 ---
 ## Improved Navigation
 
-- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). - In Progress
-- All views must be functionally routed using the frontend routing system. - In Progress
+- The application shall provide intuitive navigation between  major views (list view, detail view, calendar view). - Completed
+- All views must be functionally routed using the frontend routing system. - Completed
 - Navigation actions shall not cause unnecessary page reloads. - Completed
 ---
 ## Calendar View for Tasks
-- The system shall be able to fetch tasks in bulk from the database.
-- Tasks shall be displayed on a calendar based on their associated dates.
+- The system shall be able to fetch tasks in bulk from the database. - Completed
+- Tasks shall be displayed on a calendar based on their associated dates. - Completed
 - The frontend calendar view shall be visually organized and easy to interpret.
 - Users shall be able to select a task from the calendar to view task details.
 ---
 ## Defining the database schema
-Requirements:
 - list, tasks, description and tags must be stored as variables that take values from user input - Completed
 - these values must be stored in a database - Completed
 - database must update these values when any of these items are added, changed or deleted - Completed
@@ -84,7 +83,6 @@ Requirements:
 ## Search bar
 Requirements:
 - search bar element that takes user input - Completed
-- search filtering option that allows user to search within a certain tag
 - option to Clear Search that clears the search bar and resets the search results - Completed
 ---
 # Data Model and Architecture
