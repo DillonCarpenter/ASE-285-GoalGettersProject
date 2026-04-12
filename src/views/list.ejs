@@ -443,9 +443,11 @@
             (overdueValue === "overdue" && isOverdue) ||
             (overdueValue === "not-overdue" && !isOverdue);
 
-          const isMatch = hasActiveToolbarFilter && matchesSearch && matchesCategory && matchesStatus && matchesOverdue;
+          const matchesFilters = matchesSearch && matchesCategory && matchesStatus && matchesOverdue;
+          task.style.display = matchesFilters ? "" : "none";
+
+          const isMatch = hasActiveToolbarFilter && matchesFilters;
           task.dataset.filterMatch = isMatch ? "true" : "false";
-          task.classList.toggle("is-search-match", isMatch);
         });
 
         const matchingTasks = tasks.filter((task) => task.dataset.filterMatch === "true");

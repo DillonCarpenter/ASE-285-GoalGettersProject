@@ -52,14 +52,6 @@ html.list-page {
 	animation: slideFadeIn 0.35s ease forwards;
 }
 
-.list-group-item.is-search-match {
-	border-bottom-color: #6c63ff;
-	box-shadow: 0 0 0 1px rgba(108, 99, 255, 0.35) inset;
-	border-radius: 10px;
-	padding-left: 0.5rem;
-	padding-right: 0.5rem;
-}
-
 .list-group-item:last-child {
 	border-bottom: none;
 }
