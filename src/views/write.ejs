@@ -8,18 +8,22 @@
       <h2 class="write-modal__title">New Task</h2>
       <button id="navCloseWriteModalBtn" class="btn btn-circle" type="button" aria-label="Close">&times;</button>
     </div>
+
     <form action="/add" method="POST" class="write-modal__form">
       <div class="write-modal__group">
         <input id="navTaskTitle" type="text" class="form-control" name="title" placeholder="Title" required />
       </div>
+
       <div class="write-modal__group">
         <textarea id="navTaskDescription" class="form-control" name="description" placeholder="Description"></textarea>
       </div>
+
       <div class="write-modal__group">
         <input id="navTaskDate" type="date" class="form-control" name="date" required />
       </div>
+
       <div class="write-modal__group">
-        <select id="navTaskCategory" class="form-control" name="category" required>
+        <select id="navTaskCategory" class="form-control form-select is-placeholder" name="category" required>
           <option value="" disabled selected hidden>Category</option>
           <option value="School">School</option>
           <option value="Work">Work</option>
@@ -27,6 +31,36 @@
           <option value="Others">Others</option>
         </select>
       </div>
+
+      <div class="write-modal__group">
+        <select id="navTaskRecurrence" class="form-control form-select is-placeholder" name="recurrence">
+          <option value="" disabled selected hidden>Does not repeat</option>
+          <option value="none">Does not repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+
+      <div id="navTaskDurationWrap" class="write-modal__group" style="display:none;">
+        <div style="display:flex; gap:10px;">
+          <input
+            id="navTaskDurationValue"
+            type="number"
+            min="1"
+            class="form-control"
+            name="recurrenceDurationValue"
+            placeholder="Duration"
+          />
+          <select id="navTaskDurationUnit" class="form-control form-select is-placeholder" name="recurrenceDurationUnit">
+            <option value="" disabled selected hidden>Unit</option>
+            <option value="weeks">Weeks</option>
+            <option value="months">Months</option>
+            <option value="years">Years</option>
+          </select>
+        </div>
+      </div>
+
       <button type="submit" class="btn btn-primary">Add Task</button>
     </form>
   </div>
@@ -38,24 +72,78 @@
     const modal = document.getElementById('navWriteModal');
     const closeBtn = document.getElementById('navCloseWriteModalBtn');
     const taskDate = document.getElementById('navTaskDate');
+    const recurrenceSelect = document.getElementById('navTaskRecurrence');
+    const durationWrap = document.getElementById('navTaskDurationWrap');
+    const durationValue = document.getElementById('navTaskDurationValue');
+    const durationUnit = document.getElementById('navTaskDurationUnit');
+
+    const selects = document.querySelectorAll('.form-select');
 
     if (!openBtn || !modal || !closeBtn || !taskDate) return;
 
     const today = new Date().toISOString().split('T')[0];
     taskDate.min = today;
 
+    const updateSelectState = (select) => {
+      if (!select) return;
+      if (select.value && select.value !== "") {
+        select.classList.remove('is-placeholder');
+      } else {
+        select.classList.add('is-placeholder');
+      }
+    };
+
+    selects.forEach((select) => {
+      updateSelectState(select);
+      select.addEventListener('change', () => updateSelectState(select));
+    });
+
+    const toggleDurationFields = () => {
+      const isRecurring =
+        recurrenceSelect &&
+        recurrenceSelect.value &&
+        recurrenceSelect.value !== 'none';
+
+      if (durationWrap) {
+        durationWrap.style.display = isRecurring ? 'block' : 'none';
+      }
+
+      if (durationValue) {
+        durationValue.required = isRecurring;
+        if (!isRecurring) durationValue.value = '';
+      }
+
+      if (durationUnit) {
+        durationUnit.required = isRecurring;
+        if (!isRecurring) {
+          durationUnit.value = '';
+          updateSelectState(durationUnit);
+        }
+      }
+    };
+
     openBtn.addEventListener('click', () => {
       modal.style.display = 'flex';
+      toggleDurationFields();
     });
 
     closeBtn.addEventListener('click', () => {
       modal.style.display = 'none';
     });
 
+    if (recurrenceSelect) {
+      recurrenceSelect.addEventListener('change', () => {
+        updateSelectState(recurrenceSelect);
+        toggleDurationFields();
+      });
+    }
+
     window.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.style.display = 'none';
       }
     });
+
+    toggleDurationFields();
   })();
 </script>

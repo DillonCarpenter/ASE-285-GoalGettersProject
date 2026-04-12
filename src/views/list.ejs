@@ -16,513 +16,600 @@
   <%- include('nav.ejs') %>
   <%- include('write.ejs') %>
 
-    <div class="toolbar">
-      <div class="search-box">
-        <span class="toolbar-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="M20 20L16.65 16.65"></path>
-          </svg>
-        </span>
-
-        <input type="text" id="taskSearch" class="form-control search-input" placeholder="Search tasks..." />
-
-        <button id="sortToggle" class="icon-btn" type="button" title="Sort by due date: Soonest to Latest"
-          aria-label="Sort by due date: Soonest to Latest">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 6h10"></path>
-            <path d="M8 12h7"></path>
-            <path d="M8 18h4"></path>
-            <path d="M4 6l0 12"></path>
-            <path d="M2.5 16.5L4 18l1.5-1.5"></path>
-          </svg>
-        </button>
-
-        <button id="filterToggle" class="icon-btn" type="button" title="Filter">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 6h16"></path>
-            <path d="M7 12h10"></path>
-            <path d="M10 18h4"></path>
-          </svg>
-        </button>
-
-        <button id="clearFiltersBtn" class="icon-btn" type="button" title="Clear all">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 6L6 18"></path>
-            <path d="M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <button id="calendarToggle" class="icon-btn toolbar-calendar-btn" type="button" title="Switch to calendar view"
-        aria-label="Switch to calendar view">
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="toolbar-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-          <path d="M16 3v4"></path>
-          <path d="M8 3v4"></path>
-          <path d="M3 10h18"></path>
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M20 20L16.65 16.65"></path>
+        </svg>
+      </span>
+
+      <input type="text" id="taskSearch" class="form-control search-input" placeholder="Search tasks..." />
+
+      <button id="sortToggle" class="icon-btn" type="button" title="Sort: Newest first"
+        aria-label="Sort: Newest first">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 6h10"></path>
+          <path d="M8 12h7"></path>
+          <path d="M8 18h4"></path>
+          <path d="M4 6l0 12"></path>
+          <path d="M2.5 16.5L4 18l1.5-1.5"></path>
         </svg>
       </button>
 
-      <div id="filterMenu" class="popup-menu" style="display:none;">
-        <select id="categoryFilter" class="form-control">
-          <option value="">All Categories</option>
-          <option value="School">School</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Others">Others</option>
-        </select>
+      <button id="filterToggle" class="icon-btn" type="button" title="Filter">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6h16"></path>
+          <path d="M7 12h10"></path>
+          <path d="M10 18h4"></path>
+        </svg>
+      </button>
 
-        <select id="statusFilter" class="form-control">
-          <option value="">All Status</option>
-          <option value="incomplete">Incomplete</option>
-          <option value="completed">Completed</option>
-        </select>
-
-        <select id="overdueFilter" class="form-control">
-          <option value="">All Tasks</option>
-          <option value="overdue">Overdue</option>
-          <option value="not-overdue">Not Overdue</option>
-        </select>
-      </div>
+      <button id="clearFiltersBtn" class="icon-btn" type="button" title="Clear all">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18"></path>
+          <path d="M6 6l12 12"></path>
+        </svg>
+      </button>
     </div>
 
-    <ul class="list-group page-fade-up">
-      <% for (var i=0; i < posts.length; i++){ %>
-        <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>"
-          data-id="<%= posts[i]._id %>"
-          data-title="<%= posts[i].title %>"
-          data-category="<%= posts[i].category || 'Personal' %>"
-          data-date="<%= posts[i].date || '' %>"
-          data-description="<%= posts[i].description || '' %>"
-          data-priority="<%= posts[i].priority || '' %>"
-          data-completed="<%= posts[i].completed ? 'true' : 'false' %>">
+    <button id="calendarToggle" class="icon-btn toolbar-calendar-btn" type="button" title="Switch to calendar view"
+      aria-label="Switch to calendar view">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+        <path d="M16 3v4"></path>
+        <path d="M8 3v4"></path>
+        <path d="M3 10h18"></path>
+      </svg>
+    </button>
 
-          <!-- Completion toggle -->
-          <button type="button" class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>"
-            data-id="<%= posts[i]._id %>" aria-label="Toggle completion">
+    <div id="filterMenu" class="popup-menu" style="display:none;">
+      <select id="categoryFilter" class="form-control">
+        <option value="">All Categories</option>
+        <option value="School">School</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Others">Others</option>
+      </select>
+
+      <select id="statusFilter" class="form-control">
+        <option value="">All Status</option>
+        <option value="incomplete">Incomplete</option>
+        <option value="completed">Completed</option>
+      </select>
+
+      <select id="overdueFilter" class="form-control">
+        <option value="">All Tasks</option>
+        <option value="overdue">Overdue</option>
+        <option value="not-overdue">Not Overdue</option>
+      </select>
+    </div>
+  </div>
+
+  <ul class="list-group page-fade-up">
+    <% for (var i=0; i < posts.length; i++){ %>
+      <li class="list-group-item <%= posts[i].completed ? 'task-completed' : '' %>"
+        data-id="<%= posts[i]._id %>"
+        data-title="<%= posts[i].title %>"
+        data-category="<%= posts[i].category || 'Personal' %>"
+        data-date="<%= posts[i].date || '' %>"
+        data-description="<%= posts[i].description || '' %>"
+        data-priority="<%= posts[i].priority || '' %>"
+        data-recurrence="<%= posts[i].recurrence || 'none' %>"
+        data-recurrence-duration-value="<%= posts[i].recurrenceDurationValue || '' %>"
+        data-recurrence-duration-unit="<%= posts[i].recurrenceDurationUnit || '' %>"
+        data-recurrence-end-date="<%= posts[i].recurrenceEndDate || '' %>"
+        data-completed="<%= posts[i].completed ? 'true' : 'false' %>">
+
+        <button type="button" class="task-circle <%= posts[i].completed ? 'is-complete' : '' %>"
+          data-id="<%= posts[i]._id %>" aria-label="Toggle completion">
+        </button>
+
+        <h4>
+          <div class="task-title">
+            <%= posts[i].title %>
+          </div>
+          <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
+            <%= posts[i].category || "Personal" %>
+          </span>
+          <% if (posts[i].priority) { %>
+            <span class="priority-badge priority-<%= posts[i].priority.toLowerCase() %>">
+              <%= posts[i].priority %>
+            </span>
+          <% } %>
+        </h4>
+
+        <p>
+          <%= posts[i].date %>
+        </p>
+        <% if (posts[i].description) { %>
+          <p>
+            <%= posts[i].description %>
+          </p>
+        <% } %>
+
+        <div class="list-actions">
+          <button class="btn btn-circle edit" type="button" data-id="<%= posts[i]._id %>" aria-label="Edit task"
+            title="Edit">
+            <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M15.8787 3.70705C17.0503 2.53547 18.9498 2.53548 20.1213 3.70705L20.2929 3.87862C21.4645 5.05019 21.4645 6.94969 20.2929 8.12126L18.5556 9.85857L8.70713 19.7071C8.57897 19.8352 8.41839 19.9261 8.24256 19.9701L4.24256 20.9701C3.90178 21.0553 3.54129 20.9554 3.29291 20.7071C3.04453 20.4587 2.94468 20.0982 3.02988 19.7574L4.02988 15.7574C4.07384 15.5816 4.16476 15.421 4.29291 15.2928L14.1989 5.38685L15.8787 3.70705ZM18.7071 5.12126C18.3166 4.73074 17.6834 4.73074 17.2929 5.12126L16.3068 6.10738L17.8622 7.72357L18.8787 6.70705C19.2692 6.31653 19.2692 5.68336 18.8787 5.29283L18.7071 5.12126ZM16.4477 9.13804L14.8923 7.52185L5.90299 16.5112L5.37439 18.6256L7.48877 18.097L16.4477 9.13804Z"
+                fill="currentColor" />
+            </svg>
           </button>
 
-          <h4>
-            <div class="task-title">
-              <%= posts[i].title %>
-            </div>
-            <span class="cat-badge cat-<%= (posts[i].category || 'personal').toLowerCase() %>">
-              <%= posts[i].category || "Personal" %>
-            </span>
-            <% if (posts[i].priority) { %>
-              <span class="priority-badge priority-<%= posts[i].priority.toLowerCase() %>">
-                <%= posts[i].priority %>
-              </span>
-            <% } %>
-          </h4>
+          <button class="btn btn-circle delete" data-id="<%= posts[i]._id %>" aria-label="Delete task"
+            title="Delete">
+            <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </li>
+    <% } %>
+  </ul>
 
-          <p>
-            <%= posts[i].date %>
-          </p>
-          <% if (posts[i].description) { %>
-            <p>
-              <%= posts[i].description %>
-            </p>
-          <% } %>
+  <section id="calendarView" class="calendar-view page-fade-up" style="display:none;">
+    <div class="calendar-header">
+      <button id="calendarPrev" class="calendar-nav-btn" type="button" aria-label="Previous month">&#x2039;</button>
+      <h3 id="calendarMonthLabel" class="calendar-month-label"></h3>
+      <button id="calendarNext" class="calendar-nav-btn" type="button" aria-label="Next month">&#x203A;</button>
+    </div>
 
-          <div class="list-actions">
-            <!-- Edit -->
-            <button class="btn btn-circle edit" type="button" data-id="<%= posts[i]._id %>" aria-label="Edit task"
-              title="Edit">
-              <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path
-                  d="M15.8787 3.70705C17.0503 2.53547 18.9498 2.53548 20.1213 3.70705L20.2929 3.87862C21.4645 5.05019 21.4645 6.94969 20.2929 8.12126L18.5556 9.85857L8.70713 19.7071C8.57897 19.8352 8.41839 19.9261 8.24256 19.9701L4.24256 20.9701C3.90178 21.0553 3.54129 20.9554 3.29291 20.7071C3.04453 20.4587 2.94468 20.0982 3.02988 19.7574L4.02988 15.7574C4.07384 15.5816 4.16476 15.421 4.29291 15.2928L14.1989 5.38685L15.8787 3.70705ZM18.7071 5.12126C18.3166 4.73074 17.6834 4.73074 17.2929 5.12126L16.3068 6.10738L17.8622 7.72357L18.8787 6.70705C19.2692 6.31653 19.2692 5.68336 18.8787 5.29283L18.7071 5.12126ZM16.4477 9.13804L14.8923 7.52185L5.90299 16.5112L5.37439 18.6256L7.48877 18.097L16.4477 9.13804Z"
-                  fill="currentColor" />
-              </svg>
-            </button>
-            <!-- Delete -->
-            <button class="btn btn-circle delete" data-id="<%= posts[i]._id %>" aria-label="Delete task"
-              title="Delete">
-              <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                <path
-                  d="M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
-                  fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </li>
-        <% } %>
-    </ul>
+    <div class="calendar-weekdays">
+      <span>Sun</span>
+      <span>Mon</span>
+      <span>Tue</span>
+      <span>Wed</span>
+      <span>Thu</span>
+      <span>Fri</span>
+      <span>Sat</span>
+    </div>
 
-    <section id="calendarView" class="calendar-view page-fade-up" style="display:none;">
-      <div class="calendar-header">
-        <button id="calendarPrev" class="calendar-nav-btn" type="button" aria-label="Previous month">&#x2039;</button>
-        <h3 id="calendarMonthLabel" class="calendar-month-label"></h3>
-        <button id="calendarNext" class="calendar-nav-btn" type="button" aria-label="Next month">&#x203A;</button>
-      </div>
+    <div id="calendarGrid" class="calendar-grid"></div>
+  </section>
 
-      <div class="calendar-weekdays">
-        <span>Sun</span>
-        <span>Mon</span>
-        <span>Tue</span>
-        <span>Wed</span>
-        <span>Thu</span>
-        <span>Fri</span>
-        <span>Sat</span>
-      </div>
+  <script>
+    const searchInput = document.getElementById("taskSearch");
+    const sortToggle = document.getElementById("sortToggle");
+    const filterToggle = document.getElementById("filterToggle");
+    const calendarToggle = document.getElementById("calendarToggle");
+    const filterMenu = document.getElementById("filterMenu");
+    const categoryFilter = document.getElementById("categoryFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const overdueFilter = document.getElementById("overdueFilter");
+    const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+    const taskList = document.querySelector(".list-group");
+    const calendarView = document.getElementById("calendarView");
+    const calendarPrev = document.getElementById("calendarPrev");
+    const calendarNext = document.getElementById("calendarNext");
+    const calendarMonthLabel = document.getElementById("calendarMonthLabel");
+    const calendarGrid = document.getElementById("calendarGrid");
 
-      <div id="calendarGrid" class="calendar-grid"></div>
-    </section>
+    let sortValue = "newest";
+    let isCalendarView = false;
+    const calendarMonth = new Date();
+    calendarMonth.setDate(1);
 
-    <script>
-      const searchInput = document.getElementById("taskSearch");
-      const sortToggle = document.getElementById("sortToggle");
-      const filterToggle = document.getElementById("filterToggle");
-      const calendarToggle = document.getElementById("calendarToggle");
-      const filterMenu = document.getElementById("filterMenu");
-      const categoryFilter = document.getElementById("categoryFilter");
-      const statusFilter = document.getElementById("statusFilter");
-      const overdueFilter = document.getElementById("overdueFilter");
-      const clearFiltersBtn = document.getElementById("clearFiltersBtn");
-      const taskList = document.querySelector(".list-group");
-      const calendarView = document.getElementById("calendarView");
-      const calendarPrev = document.getElementById("calendarPrev");
-      const calendarNext = document.getElementById("calendarNext");
-      const calendarMonthLabel = document.getElementById("calendarMonthLabel");
-      const calendarGrid = document.getElementById("calendarGrid");
+    function parseDateValue(dateString) {
+      if (!dateString) return null;
+      const parsed = new Date(dateString + "T00:00:00");
+      return isNaN(parsed.getTime()) ? null : parsed;
+    }
 
-      let sortValue = "";
-      let isCalendarView = false;
-      const calendarMonth = new Date();
-      calendarMonth.setDate(1);
+    function getVisibleTasks() {
+      return Array.from(document.querySelectorAll(".list-group-item")).filter((task) => task.style.display !== "none");
+    }
 
-      function parseDateValue(dateString) {
-        if (!dateString) return null;
-        const parsed = new Date(dateString + "T00:00:00");
-        return isNaN(parsed.getTime()) ? null : parsed;
+    function updateSortToggleLabel() {
+      if (!sortToggle) return;
+
+      let label = "Sort: Newest first";
+
+      if (sortValue === "oldest") {
+        label = "Sort: Oldest first";
+      } else if (sortValue === "due-asc") {
+        label = "Sort by due date: Soonest to Latest";
+      } else if (sortValue === "due-desc") {
+        label = "Sort by due date: Latest to Soonest";
       }
 
-      function getVisibleTasks() {
-        return Array.from(document.querySelectorAll(".list-group-item")).filter((task) => task.style.display !== "none");
-      }
+      sortToggle.title = label;
+      sortToggle.setAttribute("aria-label", label);
+    }
 
-      function updateSortToggleLabel() {
-        if (!sortToggle) return;
-        const label = sortValue === "due-desc"
-          ? "Sort by due date: Latest to Soonest"
-          : "Sort by due date: Soonest to Latest";
+    function updateCalendarToggleLabel() {
+      if (!calendarToggle) return;
 
-        sortToggle.title = label;
-        sortToggle.setAttribute("aria-label", label);
-      }
+      const label = isCalendarView ? "Switch to list view" : "Switch to calendar view";
+      calendarToggle.title = label;
+      calendarToggle.setAttribute("aria-label", label);
+    }
 
-      function updateCalendarToggleLabel() {
-        if (!calendarToggle) return;
+    function openTaskCreationForDate(year, month, day) {
+      const modal = document.getElementById("navWriteModal");
+      const dateInput = document.getElementById("navTaskDate");
+      const titleInput = document.getElementById("navTaskTitle");
 
-        const label = isCalendarView ? "Switch to list view" : "Switch to calendar view";
-        calendarToggle.title = label;
-        calendarToggle.setAttribute("aria-label", label);
-      }
+      if (!modal || !dateInput) return;
 
-      function openTaskCreationForDate(year, month, day) {
-        const modal = document.getElementById("navWriteModal");
-        const dateInput = document.getElementById("navTaskDate");
-        const titleInput = document.getElementById("navTaskTitle");
+      const dateStr = new Date(year, month, day).toISOString().split("T")[0];
+      dateInput.value = dateStr;
 
-        if (!modal || !dateInput) return;
+      if (titleInput) titleInput.value = "";
+      if (titleInput) titleInput.focus();
 
-        const dateStr = new Date(year, month, day).toISOString().split("T")[0];
-        dateInput.value = dateStr;
+      modal.style.display = "flex";
+    }
 
-        if (titleInput) titleInput.value = "";
-        if (titleInput) titleInput.focus();
+    function renderCalendar(tasks) {
+      if (!calendarGrid || !calendarMonthLabel) return;
 
-        modal.style.display = "flex";
-      }
+      const year = calendarMonth.getFullYear();
+      const month = calendarMonth.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const startOffset = firstDay.getDay();
+      const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
-      function renderCalendar(tasks) {
-        if (!calendarGrid || !calendarMonthLabel) return;
+      const tasksByDay = new Map();
+      tasks.forEach((task) => {
+        const date = parseDateValue(task.dataset.date);
+        if (!date) return;
+        if (date.getFullYear() !== year || date.getMonth() !== month) return;
 
-        const year = calendarMonth.getFullYear();
-        const month = calendarMonth.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const startOffset = firstDay.getDay();
-        const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
-
-        const tasksByDay = new Map();
-        tasks.forEach((task) => {
-          const date = parseDateValue(task.dataset.date);
-          if (!date) return;
-          if (date.getFullYear() !== year || date.getMonth() !== month) return;
-
-          const day = date.getDate();
-          const entries = tasksByDay.get(day) || [];
-          entries.push({
-            id: task.dataset.id || "",
-            title: task.dataset.title || "Untitled",
-            category: task.dataset.category || "Personal",
-            completed: task.dataset.completed === "true"
-          });
-          tasksByDay.set(day, entries);
+        const day = date.getDate();
+        const entries = tasksByDay.get(day) || [];
+        entries.push({
+          id: task.dataset.id || "",
+          title: task.dataset.title || "Untitled",
+          category: task.dataset.category || "Personal",
+          completed: task.dataset.completed === "true"
         });
+        tasksByDay.set(day, entries);
+      });
 
-        calendarMonthLabel.textContent = firstDay.toLocaleString(undefined, {
-          month: "long",
-          year: "numeric"
-        });
+      calendarMonthLabel.textContent = firstDay.toLocaleString(undefined, {
+        month: "long",
+        year: "numeric"
+      });
 
-        calendarGrid.innerHTML = "";
+      calendarGrid.innerHTML = "";
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-        for (let cellIndex = 0; cellIndex < totalCells; cellIndex += 1) {
-          const dayNumber = cellIndex - startOffset + 1;
-          const cell = document.createElement("div");
-          cell.className = "calendar-cell";
+      for (let cellIndex = 0; cellIndex < totalCells; cellIndex += 1) {
+        const dayNumber = cellIndex - startOffset + 1;
+        const cell = document.createElement("div");
+        cell.className = "calendar-cell";
 
-          if (dayNumber < 1 || dayNumber > daysInMonth) {
-            cell.classList.add("calendar-cell-empty");
-            calendarGrid.appendChild(cell);
-            continue;
-          }
-
-          const cellDate = new Date(year, month, dayNumber);
-          if (cellDate.getTime() === today.getTime()) {
-            cell.classList.add("calendar-cell-today");
-          }
-
-          const dayLabel = document.createElement("button");
-          dayLabel.type = "button";
-          dayLabel.className = "calendar-day-number";
-          dayLabel.textContent = String(dayNumber);
-          dayLabel.title = `Create task for ${cellDate.toLocaleDateString()}`;
-          dayLabel.addEventListener("click", (e) => {
-            e.stopPropagation();
-            openTaskCreationForDate(year, month, dayNumber);
-          });
-          cell.appendChild(dayLabel);
-
-          const dayTasks = tasksByDay.get(dayNumber) || [];
-          dayTasks.slice(0, 3).forEach((task) => {
-            const taskChip = document.createElement("button");
-            taskChip.type = "button";
-            taskChip.className = `calendar-task-chip${task.completed ? " is-complete" : ""}`;
-            taskChip.textContent = task.title;
-            taskChip.title = `${task.title} (${task.category})`;
-
-            taskChip.addEventListener("click", () => {
-              if (task.id) {
-                window.location.href = `/detail/${task.id}`;
-              }
-            });
-
-            cell.appendChild(taskChip);
-          });
-
-          if (dayTasks.length > 3) {
-            const extraLabel = document.createElement("div");
-            extraLabel.className = "calendar-task-more";
-            extraLabel.textContent = `+${dayTasks.length - 3} more`;
-            cell.appendChild(extraLabel);
-          }
-
+        if (dayNumber < 1 || dayNumber > daysInMonth) {
+          cell.classList.add("calendar-cell-empty");
           calendarGrid.appendChild(cell);
+          continue;
         }
-      }
 
-      function setCalendarView(enabled) {
-        isCalendarView = enabled;
-        if (taskList) taskList.style.display = isCalendarView ? "none" : "grid";
-        if (calendarView) calendarView.style.display = isCalendarView ? "flex" : "none";
-        updateCalendarToggleLabel();
-
-        if (isCalendarView) {
-          renderCalendar(getVisibleTasks());
+        const cellDate = new Date(year, month, dayNumber);
+        if (cellDate.getTime() === today.getTime()) {
+          cell.classList.add("calendar-cell-today");
         }
-      }
 
-      function applyFiltersAndSort() {
-        const searchValue = (searchInput?.value || "").toLowerCase().trim();
-        const categoryValue = categoryFilter?.value || "";
-        const statusValue = statusFilter?.value || "";
-        const overdueValue = overdueFilter?.value || "";
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const tasks = Array.from(document.querySelectorAll(".list-group-item"));
-
-        tasks.forEach((task) => {
-          const title = (task.dataset.title || "").toLowerCase();
-          const category = task.dataset.category || "";
-          const date = task.dataset.date || "";
-          const description = (task.dataset.description || "").toLowerCase();
-          const completed = task.dataset.completed === "true";
-
-          const searchText = [title, category.toLowerCase(), date.toLowerCase(), description].join(" ");
-          const matchesSearch = searchText.includes(searchValue);
-          const matchesCategory = !categoryValue || category === categoryValue;
-          const matchesStatus =
-            !statusValue ||
-            (statusValue === "completed" && completed) ||
-            (statusValue === "incomplete" && !completed);
-
-          const taskDate = parseDateValue(date);
-          const isOverdue = taskDate ? taskDate < today && !completed : false;
-
-          const matchesOverdue =
-            !overdueValue ||
-            (overdueValue === "overdue" && isOverdue) ||
-            (overdueValue === "not-overdue" && !isOverdue);
-
-          task.style.display =
-            matchesSearch && matchesCategory && matchesStatus && matchesOverdue ? "" : "none";
+        const dayLabel = document.createElement("button");
+        dayLabel.type = "button";
+        dayLabel.className = "calendar-day-number";
+        dayLabel.textContent = String(dayNumber);
+        dayLabel.title = `Create task for ${cellDate.toLocaleDateString()}`;
+        dayLabel.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openTaskCreationForDate(year, month, dayNumber);
         });
+        cell.appendChild(dayLabel);
 
-        const visibleTasks = tasks.filter((task) => task.style.display !== "none");
+        const dayTasks = tasksByDay.get(dayNumber) || [];
+        dayTasks.slice(0, 3).forEach((task) => {
+          const taskChip = document.createElement("button");
+          taskChip.type = "button";
+          taskChip.className = `calendar-task-chip${task.completed ? " is-complete" : ""}`;
+          taskChip.textContent = task.title;
+          taskChip.title = `${task.title} (${task.category})`;
 
-        visibleTasks.sort((a, b) => {
-          if (sortValue === "due-asc" || sortValue === "due-desc") {
-            const aDate = parseDateValue(a.dataset.date);
-            const bDate = parseDateValue(b.dataset.date);
-
-            const aTime = aDate ? aDate.getTime() : Number.MAX_SAFE_INTEGER;
-            const bTime = bDate ? bDate.getTime() : Number.MAX_SAFE_INTEGER;
-
-            return sortValue === "due-asc" ? aTime - bTime : bTime - aTime;
-          }
-
-          return 0;
-        });
-
-        visibleTasks.forEach((task) => taskList.appendChild(task));
-        renderCalendar(visibleTasks);
-      }
-
-      document.addEventListener("click", async (e) => {
-        const editButton = e.target.closest(".edit");
-        if (editButton) {
-          const id = editButton.dataset.id;
-          window.location.href = `/detail/${id}`;
-          return;
-        }
-
-        if (e.target.classList.contains("task-circle")) {
-          e.preventDefault();
-          const id = e.target.dataset.id;
-
-          try {
-            const res = await fetch("/toggle-complete", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ _id: id })
-            });
-
-            if (!res.ok) throw new Error("Toggle failed");
-            const data = await res.json();
-
-            const li = e.target.closest("li");
-            const title = li.querySelector(".task-title");
-
-            e.target.classList.toggle("is-complete", data.completed);
-            li.dataset.completed = data.completed ? "true" : "false";
-            li.classList.toggle("task-completed", data.completed);
-
-            if (title) {
-              title.classList.toggle("task-title-complete", data.completed);
+          taskChip.addEventListener("click", () => {
+            if (task.id) {
+              window.location.href = `/detail/${task.id}`;
             }
+          });
 
-            applyFiltersAndSort();
-          } catch (err) {
-            console.error(err);
-          }
-          return;
+          cell.appendChild(taskChip);
+        });
+
+        if (dayTasks.length > 3) {
+          const extraLabel = document.createElement("div");
+          extraLabel.className = "calendar-task-more";
+          extraLabel.textContent = `+${dayTasks.length - 3} more`;
+          cell.appendChild(extraLabel);
         }
 
-        const deleteButton = e.target.closest(".delete");
-        if (!deleteButton) return;
-        const id = deleteButton.dataset.id;
+        calendarGrid.appendChild(cell);
+      }
+    }
+
+    function setCalendarView(enabled) {
+      isCalendarView = enabled;
+      if (taskList) taskList.style.display = isCalendarView ? "none" : "grid";
+      if (calendarView) calendarView.style.display = isCalendarView ? "flex" : "none";
+      updateCalendarToggleLabel();
+
+      if (isCalendarView) {
+        renderCalendar(getVisibleTasks());
+      }
+    }
+
+    function applyFiltersAndSort() {
+      const searchValue = (searchInput?.value || "").toLowerCase().trim();
+      const categoryValue = categoryFilter?.value || "";
+      const statusValue = statusFilter?.value || "";
+      const overdueValue = overdueFilter?.value || "";
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const tasks = Array.from(document.querySelectorAll(".list-group-item"));
+
+      tasks.forEach((task) => {
+        const title = (task.dataset.title || "").toLowerCase();
+        const category = task.dataset.category || "";
+        const date = task.dataset.date || "";
+        const description = (task.dataset.description || "").toLowerCase();
+        const completed = task.dataset.completed === "true";
+
+        const searchText = [title, category.toLowerCase(), date.toLowerCase(), description].join(" ");
+        const matchesSearch = searchText.includes(searchValue);
+        const matchesCategory = !categoryValue || category === categoryValue;
+        const matchesStatus =
+          !statusValue ||
+          (statusValue === "completed" && completed) ||
+          (statusValue === "incomplete" && !completed);
+
+        const taskDate = parseDateValue(date);
+        const isOverdue = taskDate ? taskDate < today && !completed : false;
+
+        const matchesOverdue =
+          !overdueValue ||
+          (overdueValue === "overdue" && isOverdue) ||
+          (overdueValue === "not-overdue" && !isOverdue);
+
+        task.style.display =
+          matchesSearch && matchesCategory && matchesStatus && matchesOverdue ? "" : "none";
+      });
+
+      const visibleTasks = tasks.filter((task) => task.style.display !== "none");
+
+      visibleTasks.sort((a, b) => {
+        if (sortValue === "newest") {
+          return String(b.dataset.id).localeCompare(String(a.dataset.id), undefined, { numeric: true });
+        }
+
+        if (sortValue === "oldest") {
+          return String(a.dataset.id).localeCompare(String(b.dataset.id), undefined, { numeric: true });
+        }
+
+        if (sortValue === "due-asc" || sortValue === "due-desc") {
+          const aDate = parseDateValue(a.dataset.date);
+          const bDate = parseDateValue(b.dataset.date);
+
+          const aTime = aDate ? aDate.getTime() : Number.MAX_SAFE_INTEGER;
+          const bTime = bDate ? bDate.getTime() : Number.MAX_SAFE_INTEGER;
+
+          return sortValue === "due-asc" ? aTime - bTime : bTime - aTime;
+        }
+
+        return 0;
+      });
+
+      visibleTasks.forEach((task) => taskList.appendChild(task));
+      renderCalendar(visibleTasks);
+    }
+
+    document.addEventListener("click", async (e) => {
+      const editButton = e.target.closest(".edit");
+      if (editButton) {
+        const id = editButton.dataset.id;
+        window.location.href = `/detail/${id}`;
+        return;
+      }
+
+      const taskCircle = e.target.closest(".task-circle");
+      if (taskCircle) {
+        e.preventDefault();
+        const id = taskCircle.dataset.id;
 
         try {
-          const res = await fetch("/delete", {
-            method: "DELETE",
+          const res = await fetch("/toggle-complete", {
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ _id: id })
           });
 
-          if (!res.ok) throw new Error("Request failed");
+          if (!res.ok) throw new Error("Toggle failed");
+          const data = await res.json();
 
-          const li = deleteButton.closest("li");
-          li.remove();
+          const li = taskCircle.closest("li");
+          const title = li.querySelector(".task-title");
+
+          taskCircle.classList.toggle("is-complete", data.completed);
+          li.dataset.completed = data.completed ? "true" : "false";
+          li.classList.toggle("task-completed", data.completed);
+
+          if (title) {
+            title.classList.toggle("task-title-complete", data.completed);
+          }
+
+          if (data.generatedTask) {
+            const task = data.generatedTask;
+
+            const newItem = document.createElement("li");
+            newItem.className = `list-group-item ${task.completed ? "task-completed" : ""}`;
+            newItem.dataset.id = task._id;
+            newItem.dataset.title = task.title;
+            newItem.dataset.category = task.category || "Personal";
+            newItem.dataset.date = task.date || "";
+            newItem.dataset.description = task.description || "";
+            newItem.dataset.priority = task.priority || "";
+            newItem.dataset.recurrence = task.recurrence || "none";
+            newItem.dataset.recurrenceDurationValue = task.recurrenceDurationValue || "";
+            newItem.dataset.recurrenceDurationUnit = task.recurrenceDurationUnit || "";
+            newItem.dataset.recurrenceEndDate = task.recurrenceEndDate || "";
+            newItem.dataset.completed = task.completed ? "true" : "false";
+
+            newItem.innerHTML = `
+              <button type="button" class="task-circle ${task.completed ? "is-complete" : ""}"
+                data-id="${task._id}" aria-label="Toggle completion">
+              </button>
+
+              <h4>
+                <div class="task-title">${task.title}</div>
+                <span class="cat-badge cat-${(task.category || "personal").toLowerCase()}">
+                  ${task.category || "Personal"}
+                </span>
+                ${task.priority ? `
+                  <span class="priority-badge priority-${task.priority.toLowerCase()}">
+                    ${task.priority}
+                  </span>
+                ` : ""}
+              </h4>
+
+              <p>${task.date || ""}</p>
+
+              ${task.description ? `<p>${task.description}</p>` : ""}
+
+              <div class="list-actions">
+                <button class="btn btn-circle edit" type="button" data-id="${task._id}" aria-label="Edit task" title="Edit">
+                  <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      d="M15.8787 3.70705C17.0503 2.53547 18.9498 2.53548 20.1213 3.70705L20.2929 3.87862C21.4645 5.05019 21.4645 6.94969 20.2929 8.12126L18.5556 9.85857L8.70713 19.7071C8.57897 19.8352 8.41839 19.9261 8.24256 19.9701L4.24256 20.9701C3.90178 21.0553 3.54129 20.9554 3.29291 20.7071C3.04453 20.4587 2.94468 20.0982 3.02988 19.7574L4.02988 15.7574C4.07384 15.5816 4.16476 15.421 4.29291 15.2928L14.1989 5.38685L15.8787 3.70705ZM18.7071 5.12126C18.3166 4.73074 17.6834 4.73074 17.2929 5.12126L16.3068 6.10738L17.8622 7.72357L18.8787 6.70705C19.2692 6.31653 19.2692 5.68336 18.8787 5.29283L18.7071 5.12126ZM16.4477 9.13804L14.8923 7.52185L5.90299 16.5112L5.37439 18.6256L7.48877 18.097L16.4477 9.13804Z"
+                      fill="currentColor" />
+                  </svg>
+                </button>
+
+                <button class="btn btn-circle delete" data-id="${task._id}" aria-label="Delete task" title="Delete">
+                  <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path
+                      d="M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                      fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+            `;
+
+            taskList.prepend(newItem);
+          }
+
           applyFiltersAndSort();
         } catch (err) {
           console.error(err);
         }
-      });
-
-      if (sortToggle) {
-        sortToggle.addEventListener("click", () => {
-          sortValue = sortValue === "due-asc" ? "due-desc" : "due-asc";
-          updateSortToggleLabel();
-          applyFiltersAndSort();
-        });
+        return;
       }
 
-      if (filterToggle) {
-        filterToggle.addEventListener("click", () => {
-          const isOpen = filterMenu.style.display === "grid";
-          filterMenu.style.display = isOpen ? "none" : "grid";
-        });
-      }
+      const deleteButton = e.target.closest(".delete");
+      if (!deleteButton) return;
+      const id = deleteButton.dataset.id;
 
-      if (calendarToggle) {
-        calendarToggle.addEventListener("click", () => {
-          filterMenu.style.display = "none";
-          setCalendarView(!isCalendarView);
+      try {
+        const res = await fetch("/delete", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ _id: id })
         });
-      }
 
-      if (calendarPrev) {
-        calendarPrev.addEventListener("click", () => {
-          calendarMonth.setMonth(calendarMonth.getMonth() - 1);
-          renderCalendar(getVisibleTasks());
-        });
-      }
+        if (!res.ok) throw new Error("Request failed");
 
-      if (calendarNext) {
-        calendarNext.addEventListener("click", () => {
-          calendarMonth.setMonth(calendarMonth.getMonth() + 1);
-          renderCalendar(getVisibleTasks());
-        });
+        const li = deleteButton.closest("li");
+        li.remove();
+        applyFiltersAndSort();
+      } catch (err) {
+        console.error(err);
       }
+    });
 
-      document.addEventListener("click", (e) => {
-        if (!e.target.closest(".toolbar")) {
-          filterMenu.style.display = "none";
+    if (sortToggle) {
+      sortToggle.addEventListener("click", () => {
+        if (sortValue === "newest") {
+          sortValue = "oldest";
+        } else if (sortValue === "oldest") {
+          sortValue = "due-asc";
+        } else if (sortValue === "due-asc") {
+          sortValue = "due-desc";
+        } else {
+          sortValue = "newest";
         }
+
+        updateSortToggleLabel();
+        applyFiltersAndSort();
       });
+    }
 
-      if (searchInput) searchInput.addEventListener("input", applyFiltersAndSort);
-      if (categoryFilter) categoryFilter.addEventListener("change", applyFiltersAndSort);
-      if (statusFilter) statusFilter.addEventListener("change", applyFiltersAndSort);
-      if (overdueFilter) overdueFilter.addEventListener("change", applyFiltersAndSort);
+    if (filterToggle) {
+      filterToggle.addEventListener("click", () => {
+        const isOpen = filterMenu.style.display === "grid";
+        filterMenu.style.display = isOpen ? "none" : "grid";
+      });
+    }
 
-      if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener("click", () => {
-          if (searchInput) searchInput.value = "";
-          sortValue = "";
-          updateSortToggleLabel();
-          if (categoryFilter) categoryFilter.value = "";
-          if (statusFilter) statusFilter.value = "";
-          if (overdueFilter) overdueFilter.value = "";
-          filterMenu.style.display = "none";
-          applyFiltersAndSort();
-        });
+    if (calendarToggle) {
+      calendarToggle.addEventListener("click", () => {
+        filterMenu.style.display = "none";
+        setCalendarView(!isCalendarView);
+      });
+    }
+
+    if (calendarPrev) {
+      calendarPrev.addEventListener("click", () => {
+        calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+        renderCalendar(getVisibleTasks());
+      });
+    }
+
+    if (calendarNext) {
+      calendarNext.addEventListener("click", () => {
+        calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+        renderCalendar(getVisibleTasks());
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".toolbar")) {
+        filterMenu.style.display = "none";
       }
+    });
 
-      updateSortToggleLabel();
-      updateCalendarToggleLabel();
-      applyFiltersAndSort();
-    </script>
+    if (searchInput) searchInput.addEventListener("input", applyFiltersAndSort);
+    if (categoryFilter) categoryFilter.addEventListener("change", applyFiltersAndSort);
+    if (statusFilter) statusFilter.addEventListener("change", applyFiltersAndSort);
+    if (overdueFilter) overdueFilter.addEventListener("change", applyFiltersAndSort);
+
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener("click", () => {
+        if (searchInput) searchInput.value = "";
+        sortValue = "newest";
+        updateSortToggleLabel();
+        if (categoryFilter) categoryFilter.value = "";
+        if (statusFilter) statusFilter.value = "";
+        if (overdueFilter) overdueFilter.value = "";
+        filterMenu.style.display = "none";
+        applyFiltersAndSort();
+      });
+    }
+
+    updateSortToggleLabel();
+    updateCalendarToggleLabel();
+    applyFiltersAndSort();
+  </script>
 
 </body>
 

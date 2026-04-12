@@ -5,7 +5,6 @@ import { getPostsCollection, getCounterCollection } from '../util/db.js';
 import { runAddPost, runListGet } from "../util/util.js";
 import { User } from "../util/user.js";
 
-
 export function createRouter(db) {
   const router = express.Router();
   const posts = getPostsCollection();
@@ -21,6 +20,63 @@ export function createRouter(db) {
   const parseObjectId = (value) => {
     if (!ObjectId.isValid(value)) return null;
     return new ObjectId(value);
+  };
+
+  const parseSafeDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(`${dateString}T00:00:00`);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
+  const formatDateOnly = (date) => {
+    return date.toISOString().split("T")[0];
+  };
+
+  const getNextDueDate = (currentDate, recurrence) => {
+    const date = parseSafeDate(currentDate);
+    if (!date) return null;
+
+    if (recurrence === "daily") {
+      date.setDate(date.getDate() + 1);
+    } else if (recurrence === "weekly") {
+      date.setDate(date.getDate() + 7);
+    } else if (recurrence === "monthly") {
+      date.setMonth(date.getMonth() + 1);
+    } else {
+      return null;
+    }
+
+    return formatDateOnly(date);
+  };
+
+  const getRecurrenceEndDate = (startDate, durationValue, durationUnit) => {
+    const date = parseSafeDate(startDate);
+    const value = Number(durationValue);
+
+    if (!date || !value || value < 1) return null;
+
+    if (durationUnit === "weeks") {
+      date.setDate(date.getDate() + (value * 7));
+    } else if (durationUnit === "months") {
+      date.setMonth(date.getMonth() + value);
+    } else {
+      date.setFullYear(date.getFullYear() + value);
+    }
+
+    date.setDate(date.getDate() - 1);
+    return formatDateOnly(date);
+  };
+
+  const shouldGenerateNextTask = (task, nextDate) => {
+    if (!task.recurrence || task.recurrence === "none") return false;
+    if (!nextDate) return false;
+    if (!task.recurrenceEndDate) return true;
+
+    const next = parseSafeDate(nextDate);
+    const end = parseSafeDate(task.recurrenceEndDate);
+
+    if (!next || !end) return false;
+    return next.getTime() <= end.getTime();
   };
 
   router.get('/', requireCurrentUser, async function (req, resp) {
@@ -64,64 +120,161 @@ export function createRouter(db) {
     }
   });
 
- router.post('/add', requireCurrentUser, async function (req, resp) {
-  try {
-    const { title, description, date, category } = req.body;
-    const allowed = new Set(["School", "Work", "Personal", "Others"]);
-    const today = new Date().toISOString().split("T")[0];
+  router.post('/add', requireCurrentUser, async function (req, resp) {
+    try {
+      const {
+        title,
+        description,
+        date,
+        category,
+        recurrence,
+        recurrenceDurationValue,
+        recurrenceDurationUnit
+      } = req.body;
 
-    if (!title || !title.trim()) {
-      return resp.status(400).send("Title is required.");
+      const allowed = new Set(["School", "Work", "Personal", "Others"]);
+      const allowedRecurrence = new Set(["none", "daily", "weekly", "monthly"]);
+      const allowedDurationUnits = new Set(["weeks", "months", "years"]);
+      const today = new Date().toISOString().split("T")[0];
+
+      if (!title || !title.trim()) {
+        return resp.status(400).send("Title is required.");
+      }
+
+      if (!date) {
+        return resp.status(400).send("Date is required.");
+      }
+
+      if (date < today) {
+        return resp.status(400).send("Date cannot be in the past.");
+      }
+
+      if (!allowed.has((category || "").trim())) {
+        return resp.status(400).send("Invalid category.");
+      }
+
+      const safeRecurrence = (recurrence || "none").trim();
+      if (!allowedRecurrence.has(safeRecurrence)) {
+        return resp.status(400).send("Invalid recurrence.");
+      }
+
+      let safeDurationValue = null;
+      let safeDurationUnit = null;
+      let recurrenceEndDate = null;
+
+      if (safeRecurrence !== "none") {
+        safeDurationValue = Number(recurrenceDurationValue);
+        safeDurationUnit = (recurrenceDurationUnit || "years").trim();
+
+        if (!safeDurationValue || safeDurationValue < 1) {
+          return resp.status(400).send("Recurring tasks need a valid duration.");
+        }
+
+        if (!allowedDurationUnits.has(safeDurationUnit)) {
+          return resp.status(400).send("Invalid recurrence duration unit.");
+        }
+
+        recurrenceEndDate = getRecurrenceEndDate(date, safeDurationValue, safeDurationUnit);
+      }
+
+      req.body = {
+        ...req.body,
+        title: title.trim(),
+        description: description || "",
+        date,
+        category: category.trim(),
+        completed: false,
+        recurrence: safeRecurrence,
+        recurrenceDurationValue: safeDurationValue,
+        recurrenceDurationUnit: safeDurationUnit,
+        recurrenceEndDate,
+        nextGenerated: false
+      };
+
+      await runAddPost(req);
+      resp.redirect('/list');
+    } catch (e) {
+      console.error(e);
+      resp.status(500).send('Error');
     }
-
-    if (!date) {
-      return resp.status(400).send("Date is required.");
-    }
-
-    if (date < today) {
-      return resp.status(400).send("Date cannot be in the past.");
-    }
-
-    if (!allowed.has((category || "").trim())) {
-      return resp.status(400).send("Invalid category.");
-    }
-
-    await runAddPost(req);
-    resp.redirect('/list');
-  } catch (e) {
-    console.error(e);
-    resp.status(500).send('Error');
-  }
-});
+  });
 
   router.get('/list', requireCurrentUser, function (req, resp) {
     runListGet(req, resp);
   });
-
-
 
   router.patch("/toggle-complete", requireCurrentUser, async (req, resp) => {
     const id = parseObjectId(req.body._id);
     if (!id) return resp.status(400).send({ error: "invalid id" });
 
     try {
-      const post = await posts.findOne({ _id: id });
+      const post = await posts.findOne({ _id: id, userId: req.session.userId });
       if (!post) return resp.status(404).send({ error: "not found" });
 
       const next = !post.completed;
+      let generatedTask = null;
 
       await posts.updateOne(
-        { _id: id },
+        { _id: id, userId: req.session.userId },
         { $set: { completed: next } }
       );
 
-      resp.json({ ok: true, completed: next });
+      if (
+        next &&
+        post.recurrence &&
+        post.recurrence !== "none" &&
+        !post.nextGenerated
+      ) {
+        const nextDate = getNextDueDate(post.date, post.recurrence);
+
+        if (shouldGenerateNextTask(post, nextDate)) {
+          const nextTaskBody = {
+            title: post.title,
+            description: post.description || "",
+            date: nextDate,
+            category: post.category || "Personal",
+            completed: false,
+            userId: req.session.userId,
+            recurrence: post.recurrence,
+            recurrenceDurationValue: post.recurrenceDurationValue || null,
+            recurrenceDurationUnit: post.recurrenceDurationUnit || null,
+            recurrenceEndDate: post.recurrenceEndDate || null,
+            nextGenerated: false
+          };
+
+          await runAddPost({
+            ...req,
+            body: nextTaskBody
+          });
+
+          generatedTask = await posts.findOne(
+            {
+              userId: req.session.userId,
+              title: nextTaskBody.title,
+              date: nextTaskBody.date,
+              category: nextTaskBody.category,
+              completed: false
+            },
+            { sort: { _id: -1 } }
+          );
+
+          await posts.updateOne(
+            { _id: id, userId: req.session.userId },
+            { $set: { nextGenerated: true } }
+          );
+        }
+      }
+
+      resp.json({
+        ok: true,
+        completed: next,
+        generatedTask
+      });
     } catch (e) {
       console.error(e);
       resp.status(500).send({ error: "toggle error" });
     }
   });
-
 
   router.delete('/delete', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body._id);
@@ -130,17 +283,18 @@ export function createRouter(db) {
       return;
     }
     try {
-      await posts.deleteOne({ _id: id });
+      await posts.deleteOne({ _id: id, userId: req.session.userId });
 
       const query = { name: 'Total Post' };
       const stage = { $inc: { totalPost: -1 } };
       await counter.updateOne(query, stage);
 
-      console.log('Delete complete')
-      resp.send('Delete complete')
+      console.log('Delete complete');
+      resp.send('Delete complete');
     }
     catch (e) {
       console.error(e);
+      resp.status(500).send({ error: 'delete error' });
     }
   });
 
@@ -151,23 +305,21 @@ export function createRouter(db) {
       return;
     }
     try {
-      let res = await posts.findOne({ _id: id })
-      // req.params.id contains the value of id
-      console.log('app.get.detail: Update complete')
+      let res = await posts.findOne({ _id: id, userId: req.session.userId });
+      console.log('app.get.detail: Update complete');
       console.log({ data: res });
       if (res != null) {
-        resp.render('detail.ejs', { data: res })
+        resp.render('detail.ejs', { data: res });
       }
       else {
-        console.log(error);
-        resp.status(500).send({ error: 'result is null' })
+        resp.status(500).send({ error: 'result is null' });
       }
     }
     catch (error) {
-      console.log(error)
-      resp.status(500).send({ error: 'Error from db.collection().findOne()' })
+      console.log(error);
+      resp.status(500).send({ error: 'Error from db.collection().findOne()' });
     }
-  })
+  });
 
   router.put('/edit', requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body.id);
@@ -175,8 +327,18 @@ export function createRouter(db) {
       return resp.status(400).send({ error: 'invalid id' });
     }
 
-    const { title, description, date } = req.body;
+    const {
+      title,
+      description,
+      date,
+      recurrence,
+      recurrenceDurationValue,
+      recurrenceDurationUnit
+    } = req.body;
+
     const allowed = new Set(["School", "Work", "Personal", "Others"]);
+    const allowedRecurrence = new Set(["none", "daily", "weekly", "monthly"]);
+    const allowedDurationUnits = new Set(["weeks", "months", "years"]);
     const category = (req.body.category || "").trim();
     const today = new Date().toISOString().split("T")[0];
 
@@ -196,15 +358,44 @@ export function createRouter(db) {
       return resp.status(400).send("Invalid category.");
     }
 
+    const safeRecurrence = (recurrence || "none").trim();
+    if (!allowedRecurrence.has(safeRecurrence)) {
+      return resp.status(400).send("Invalid recurrence.");
+    }
+
+    let safeDurationValue = null;
+    let safeDurationUnit = null;
+    let recurrenceEndDate = null;
+
+    if (safeRecurrence !== "none") {
+      safeDurationValue = Number(recurrenceDurationValue);
+      safeDurationUnit = (recurrenceDurationUnit || "years").trim();
+
+      if (!safeDurationValue || safeDurationValue < 1) {
+        return resp.status(400).send("Recurring tasks need a valid duration.");
+      }
+
+      if (!allowedDurationUnits.has(safeDurationUnit)) {
+        return resp.status(400).send("Invalid recurrence duration unit.");
+      }
+
+      recurrenceEndDate = getRecurrenceEndDate(date, safeDurationValue, safeDurationUnit);
+    }
+
     try {
       await posts.updateOne(
-        { _id: id },
+        { _id: id, userId: req.session.userId },
         {
           $set: {
             title: title.trim(),
-            description,
+            description: description || "",
             date,
-            category
+            category,
+            recurrence: safeRecurrence,
+            recurrenceDurationValue: safeDurationValue,
+            recurrenceDurationUnit: safeDurationUnit,
+            recurrenceEndDate,
+            nextGenerated: false
           }
         }
       );
@@ -217,22 +408,22 @@ export function createRouter(db) {
     }
   });
 
-  // API for JSON
-  
   router.get('/listjson', requireCurrentUser, async function (req, resp) {
     try {
-      const res = await posts.find().toArray();
-      resp.send(res)
+      const res = await posts.find({ userId: req.session.userId }).toArray();
+      resp.send(res);
     } catch (e) {
       console.error(e);
     }
   });
+
   router.get('/login', (req, res) => {
     if (req.session.userId) return res.redirect('/');
     res.render("login");
   });
+
   router.get('/signup', (req, res) => {
-    res.render('signup')
+    res.render('signup');
   });
 
   const handleLogout = (req, res) => {
@@ -248,7 +439,6 @@ export function createRouter(db) {
 
   router.get('/logout', handleLogout);
 
-  //start of login route blocks; may need to be moved
   router.post("/login", async (req, resp) => {
     try {
       const { username, password } = req.body;
@@ -266,33 +456,31 @@ export function createRouter(db) {
     }
   });
   
-  router.post("/signup", async (req, resp)=>{
-      try {
-        const {username, password} = req.body;
+  router.post("/signup", async (req, resp)=> {
+    try {
+      const {username, password} = req.body;
 
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-          return resp.status(409).json({ message: "Error: Username already exists." });
-        }
-
-        const hashPass = await bcrypt.hash(password, 10);
-        const newUser = new User({
-          username,
-          password: hashPass
-        });
-        await newUser.save();
-        console.log("User created.");
-        resp.json({message: "User created."});
-      } catch (e) {
-        if (e && e.code === 11000) {
-          return resp.status(409).json({ message: "Error: Username already exists." });
-        }
-        console.error(e);
-        resp.status(500).json({ error: "Not successful." });
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return resp.status(409).json({ message: "Error: Username already exists." });
       }
-  });
 
-  //end of login blocks
+      const hashPass = await bcrypt.hash(password, 10);
+      const newUser = new User({
+        username,
+        password: hashPass
+      });
+      await newUser.save();
+      console.log("User created.");
+      resp.json({message: "User created."});
+    } catch (e) {
+      if (e && e.code === 11000) {
+        return resp.status(409).json({ message: "Error: Username already exists." });
+      }
+      console.error(e);
+      resp.status(500).json({ error: "Not successful." });
+    }
+  });
 
   return router;
 }
