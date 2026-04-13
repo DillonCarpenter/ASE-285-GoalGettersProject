@@ -23,18 +23,19 @@ theme: default
 - Categories are visually different - Completed
 ---
 ## Due Date Alerts
-- Overdue Tasks are highlighted
-- Due Soon Tasks are highlighted
-- These statuses update based on conditions
+- Overdue Tasks are highlighted - In Progress
+- Due Soon Tasks are highlighted - In Progress
+- These statuses update based on conditions - In Progress
+- The user is greated by a popup indicating what tasks they have due soon - Completed
 ---
 ## Sort & Filter Tasks
-- Users can sort tasks by:
+- Users can sort tasks by: - In Progress
 - Due date (Soonest to Latest, Latest or Soonest)  - Completed
 - Priority (High to Low, Low to High) - Completed
 ---
-- Users can filter tasks by:
+- Users can filter tasks by: - In Progress
 - Category (e.g., School only) - Completed
-- Priority (e.g., High only)
+- Priority (e.g., High only) - In Progress
 - Status (Completed or Incomplete) and Overdue - Completed
 - Sort and filter can be combined (e.g., Category = Work and Sort by due date). - Completed
 - Users can clear all filters. - Completed
@@ -50,11 +51,11 @@ theme: default
 - Users shall be able to select a post from the list to view, edit, or delete it. - Completed
 ---
 ## Repeating Tasks
-- The system shall allow users to create tasks that repeat on a defined schedule (e.g., daily, weekly, monthly).
-- Users shall be able to select the recurrence pattern when creating or editing a task.
-- The system shall automatically generate future task instances based on the selected recurrence pattern.
-- Users shall be able to modify or cancel a repeating task without affecting unrelated tasks.
-- The system shall store recurrence rules in the database to ensure persistence across sessions.
+- The system shall allow users to create tasks that repeat on a defined schedule (e.g., daily, weekly, monthly). - Completed
+- Users shall be able to select the recurrence pattern when creating or editing a task. - Completed
+- The system shall automatically generate future task instances based on the selected recurrence pattern. - Completed
+- Users shall be able to modify or cancel a repeating task without affecting unrelated tasks. - Completed
+- The system shall store recurrence rules in the database to ensure persistence across sessions. - Completed
 ---
 ## Improved Navigation
 
@@ -65,8 +66,8 @@ theme: default
 ## Calendar View for Tasks
 - The system shall be able to fetch tasks in bulk from the database. - Completed
 - Tasks shall be displayed on a calendar based on their associated dates. - Completed
-- The frontend calendar view shall be visually organized and easy to interpret.
-- Users shall be able to select a task from the calendar to view task details.
+- The frontend calendar view shall be visually organized and easy to interpret. - Completed
+- Users shall be able to select a task from the calendar to view task details. - Completed
 ---
 ## Defining the database schema
 - list, tasks, description and tags must be stored as variables that take values from user input - Completed
