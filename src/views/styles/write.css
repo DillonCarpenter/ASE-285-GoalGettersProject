@@ -102,3 +102,27 @@ a.btn {
 		gap: 0.9rem;
 	}
 }
+
+.write-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.write-modal {
+  position: relative;
+  z-index: 10000;
+}
+
+
+.form-select.is-placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.form-select {
+  color: #ffffff;
+}
+
+.form-select option {
+  color: #ffffff;
+}

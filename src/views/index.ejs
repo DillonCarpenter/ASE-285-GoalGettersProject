@@ -50,7 +50,7 @@
         <h2 class="home-today-title">Coming up soon</h2>
       </div>
 
-      <ul class="today-list no-bullets">
+      <ul class="today-list no-bullets" id="upcomingTasks">
         <% if (typeof comingSoonTasks !== 'undefined' && comingSoonTasks.length > 0) { %>
           <% for (let i = 0; i < comingSoonTasks.length; i++) { %>
             <a href="/detail/<%= comingSoonTasks[i]._id %>" class="home-today-link">
@@ -68,18 +68,54 @@
       </ul>
     </section>
   </main>
+  <div id="alertModal" class="alert-modal-overlay" style="display: none">
+    <div class="alert-modal">
+      <div class="alert-modal-header">
+        <h2 class="alert-modal-title">Alert</h2>
+        <button id="navCloseAlertModalButton" class="btn btn-circle" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="alert-modal-body" id="alertBody">
+        <h3>You have upcoming tasks</h3>
+
+      </div>
+    </div>
+  </div>
 
   <script>
     (() => {
       const greetingEl = document.getElementById('homeGreeting');
       if (!greetingEl) return;
 
-      const username = "<%= currentUser?.username || '' %>".trim() || "there";
+      const usernameRaw = "<%= currentUser?.username || '' %>".trim() || "there";
+      const username = usernameRaw.charAt(0).toUpperCase() + usernameRaw.slice(1);
       const hour = new Date().getHours();
       const greeting = hour < 12 ? "Good morning" : "Good afternoon";
 
       greetingEl.textContent = `👋 ${greeting}, ${username}`;
     })();
+    // alert modal functions
+    const alertModal = document.getElementById('alertModal');
+    const alertBody = document.getElementById('alertBody');
+    const closeBtn = document.getElementById('navCloseAlertModalButton');
+    const comingSoonTasks = JSON.parse('<%- JSON.stringify(comingSoonTasks) %>');
+    console.log(comingSoonTasks);
+    if(comingSoonTasks){
+      alertModal.style.display = "flex";
+        alertBody.innerHTML += "";
+        const ul = document.createElement("ul");
+        comingSoonTasks.forEach(task=> {
+          const li = document.createElement("li");
+          li.textContent = task.title;
+          li.className = "alert-li"
+          ul.appendChild(li);
+        })
+        alertBody.appendChild(ul);
+      } 
+
+    closeBtn.addEventListener('click', ()=> {
+      alertModal.style.display = "none";
+    })
+
   </script>
 </body>
 

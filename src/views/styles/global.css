@@ -46,8 +46,9 @@ html {
   right: 0;
   font-size: 2rem;
   padding: 1rem 0;
-  z-index: 1000;
+  z-index: 1200;
   background: rgba(24, 26, 27, 0.96);
+  border-bottom: 1px solid #2f3338;
 }
 
 .nav__links {
@@ -64,6 +65,63 @@ html {
   flex: 1;
 }
 
+.nav-user {
+  position: relative;
+}
+
+.nav-user__trigger {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: #6c63ff;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.nav-user__trigger:hover,
+.nav-user__trigger:focus {
+  background: #5548c8;
+}
+
+.nav-user__menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 1300;
+  min-width: 110px;
+  padding: 0.4rem;
+  border: 1px solid #2f3338;
+  border-radius: 10px;
+  background: #111418;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+.nav-user__menu.is-open {
+  display: block;
+}
+
+.nav-user__menu-link {
+  display: block;
+  color: #fca5a5;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+}
+
+.nav-user__menu-link:hover,
+.nav-user__menu-link:focus {
+  background: #1b2128;
+  color: #f87171;
+}
+
 .nav-add-task {
   position: fixed;
   right: 0.7rem;
@@ -74,15 +132,24 @@ html {
 }
 
 .nav__link {
-  color: white;
+  color: #9aa4b2;
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .nav__link:hover,
-.nav__link:focus,
+.nav__link:focus {
+  color: #cbd5e1;
+}
+
 .nav__link:active,
 .nav__link:visited {
   text-decoration: none;
+}
+
+.nav__link--active {
+  color: #ffffff;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

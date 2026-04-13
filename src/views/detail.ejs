@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-  <!-- Required meta tags -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
@@ -12,81 +11,185 @@
 </head>
 
 <body>
-    <div class="write-modal-overlay">
-      <div class="write-modal">
-        <div class="write-modal__header">
-          <h2 class="write-modal__title">Task Details</h2>
-          <a id="closeWriteModalBtn" href="/list" class="btn btn-circle" aria-label="Close">
-            &times;
-          </a>
-        </div>
-        <form action="/edit?_method=PUT" method="POST" class="write-modal__form">
-          <input type="hidden" name="id" value="<%= data._id %>">
-          <div class="write-modal__group">
-            <input id="taskTitle" type="text" class="form-control" name="title" value="<%= data.title %>"
-              data-initial="<%= data.title %>" placeholder="Title" />
-          </div>
-          <div class="write-modal__group">
-            <textarea id="taskDescription" class="form-control" name="description"
-              data-initial="<%= data.description || '' %>"
-              placeholder="Description"><%= data.description || '' %></textarea>
-          </div>
-          <div class="write-modal__group">
-            <input id="taskDate" type="date" class="form-control" name="date" value="<%= data.date %>"
-              data-initial="<%= data.date %>" required />
-          </div>
-          <div class="write-modal__group">
-            <select id="taskCategory" class="form-control" name="category" required
-              data-initial="<%= data.category || 'Personal' %>">
+  <div class="write-modal-overlay">
+    <div class="write-modal">
+      <div class="write-modal__header">
+        <h2 class="write-modal__title">Task Details</h2>
+        <a id="closeWriteModalBtn" href="/list" class="btn btn-circle" aria-label="Close">
+          &times;
+        </a>
+      </div>
 
-              <option value="School" <%=(data.category==="School" ) ? "selected" : "" %>>School</option>
-              <option value="Work" <%=(data.category==="Work" ) ? "selected" : "" %>>Work</option>
-              <option value="Personal" <%=(!data.category || data.category==="Personal" ) ? "selected" : "" %>>Personal
-              </option>
-              <option value="Others" <%=(data.category==="Others" ) ? "selected" : "" %>>Others</option>
+      <form action="/edit?_method=PUT" method="POST" class="write-modal__form">
+        <input type="hidden" name="id" value="<%= data._id %>">
+
+        <div class="write-modal__group">
+          <input
+            id="taskTitle"
+            type="text"
+            class="form-control"
+            name="title"
+            value="<%= data.title %>"
+            data-initial="<%= data.title %>"
+            placeholder="Title"
+          />
+        </div>
+
+        <div class="write-modal__group">
+          <textarea
+            id="taskDescription"
+            class="form-control"
+            name="description"
+            data-initial="<%= data.description || '' %>"
+            placeholder="Description"
+          ><%= data.description || '' %></textarea>
+        </div>
+
+        <div class="write-modal__group">
+          <input
+            id="taskDate"
+            type="date"
+            class="form-control"
+            name="date"
+            value="<%= data.date %>"
+            data-initial="<%= data.date %>"
+            required
+          />
+        </div>
+
+        <div class="write-modal__group">
+          <select
+            id="taskCategory"
+            class="form-control"
+            name="category"
+            required
+            data-initial="<%= data.category || 'Personal' %>"
+          >
+            <option value="School" <%= data.category === 'School' ? 'selected' : '' %>>School</option>
+            <option value="Work" <%= data.category === 'Work' ? 'selected' : '' %>>Work</option>
+            <option value="Personal" <%= (!data.category || data.category === 'Personal') ? 'selected' : '' %>>Personal</option>
+            <option value="Others" <%= data.category === 'Others' ? 'selected' : '' %>>Others</option>
+          </select>
+        </div>
+
+        <div class="write-modal__group">
+          <select
+            id="taskRecurrence"
+            class="form-control"
+            name="recurrence"
+            data-initial="<%= data.recurrence || 'none' %>"
+          >
+            <option value="none" <%= (!data.recurrence || data.recurrence === 'none') ? 'selected' : '' %>>Does not repeat</option>
+            <option value="daily" <%= data.recurrence === 'daily' ? 'selected' : '' %>>Daily</option>
+            <option value="weekly" <%= data.recurrence === 'weekly' ? 'selected' : '' %>>Weekly</option>
+            <option value="monthly" <%= data.recurrence === 'monthly' ? 'selected' : '' %>>Monthly</option>
+          </select>
+        </div>
+
+       <div
+  id="taskDurationWrap"
+  class="write-modal__group"
+  <% if (data.recurrence && data.recurrence !== 'none') { %>
+    style="display:block;"
+  <% } else { %>
+    style="display:none;"
+  <% } %>
+>
+          <div style="display:flex; gap:10px;">
+            <input
+              id="taskDurationValue"
+              type="number"
+              min="1"
+              class="form-control"
+              name="recurrenceDurationValue"
+              value="<%= data.recurrenceDurationValue ? data.recurrenceDurationValue : '' %>"
+              data-initial="<%= data.recurrenceDurationValue ? data.recurrenceDurationValue : '' %>"
+              placeholder="Duration"
+            />
+            <select
+              id="taskDurationUnit"
+              class="form-control"
+              name="recurrenceDurationUnit"
+              data-initial="<%= data.recurrenceDurationUnit || 'years' %>"
+            >
+              <option value="weeks" <%= data.recurrenceDurationUnit === 'weeks' ? 'selected' : '' %>>Weeks</option>
+              <option value="months" <%= data.recurrenceDurationUnit === 'months' ? 'selected' : '' %>>Months</option>
+              <option value="years" <%= (!data.recurrenceDurationUnit || data.recurrenceDurationUnit === 'years') ? 'selected' : '' %>>Years</option>
             </select>
           </div>
+        </div>
 
-          <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
-        </form>
-      </div>
+        <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
+      </form>
     </div>
+  </div>
 
-    <script>
-      const form = document.querySelector('.write-modal__form');
-      const saveBtn = document.getElementById('saveBtn');
-      const taskDate = document.getElementById('taskDate');
-      const today = new Date().toISOString().split('T')[0];
+  <script>
+    const form = document.querySelector('.write-modal__form');
+    const saveBtn = document.getElementById('saveBtn');
+    const taskDate = document.getElementById('taskDate');
+    const taskRecurrence = document.getElementById('taskRecurrence');
+    const taskDurationWrap = document.getElementById('taskDurationWrap');
+    const taskDurationValue = document.getElementById('taskDurationValue');
+    const today = new Date().toISOString().split('T')[0];
 
-      if (taskDate) {
-        taskDate.min = today;
+    if (taskDate) {
+      taskDate.min = today;
+    }
+
+    const toggleDurationFields = () => {
+      const isRecurring = taskRecurrence && taskRecurrence.value !== 'none';
+
+      if (taskDurationWrap) {
+        taskDurationWrap.style.display = isRecurring ? 'block' : 'none';
       }
 
-      const updateSaveState = () => {
-        const fields = form.querySelectorAll('[data-initial]');
-        const changed = Array.from(fields).some((field) => field.value !== field.dataset.initial);
-        saveBtn.disabled = !changed;
-        saveBtn.classList.toggle('is-disabled', !changed);
-      };
+      if (taskDurationValue) {
+        taskDurationValue.required = isRecurring;
+      }
+    };
 
-      form.addEventListener('input', updateSaveState);
-      form.addEventListener('change', updateSaveState);
+    const updateSaveState = () => {
+      const fields = form.querySelectorAll('[data-initial]');
+      const changed = Array.from(fields).some((field) => field.value !== field.dataset.initial);
+      saveBtn.disabled = !changed;
+      saveBtn.classList.toggle('is-disabled', !changed);
+    };
 
-      form.addEventListener('submit', (e) => {
-        if (!taskDate.value) {
-          e.preventDefault();
-          alert('Please select a date.');
-          return;
-        }
+    form.addEventListener('input', updateSaveState);
+    form.addEventListener('change', updateSaveState);
 
-        if (taskDate.value < today) {
-          e.preventDefault();
-          alert('Date cannot be in the past.');
-        }
+    if (taskRecurrence) {
+      taskRecurrence.addEventListener('change', () => {
+        toggleDurationFields();
+        updateSaveState();
       });
+    }
 
-      updateSaveState();
-    </script>
+    form.addEventListener('submit', (e) => {
+      if (!taskDate.value) {
+        e.preventDefault();
+        alert('Please select a date.');
+        return;
+      }
+
+      if (taskDate.value < today) {
+        e.preventDefault();
+        alert('Date cannot be in the past.');
+        return;
+      }
+
+      if (taskRecurrence && taskRecurrence.value !== 'none') {
+        if (!taskDurationValue.value || Number(taskDurationValue.value) < 1) {
+          e.preventDefault();
+          alert('Please enter a valid duration.');
+        }
+      }
+    });
+
+    toggleDurationFields();
+    updateSaveState();
+  </script>
 </body>
 
 </html>
