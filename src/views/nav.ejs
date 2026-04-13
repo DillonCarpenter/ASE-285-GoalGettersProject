@@ -1,8 +1,54 @@
 <nav class="nav">
   <ul class="nav__links">
-    <li><a href="/" class="nav__link">Home</a></li>
-    <li><a href="/list" class="nav__link">List</a></li>
+    <li><a href="/" class="nav__link" data-nav-target="home">Home</a></li>
+    <li><a href="/list" class="nav__link" data-nav-target="list">List</a></li>
     <li class="nav__spacer" aria-hidden="true"></li>
-    <li><a href="/logout" class="nav__link" style="color: lightcoral;">Logout</a></li>
+    <li class="nav-user">
+      <button type="button" class="nav-user__trigger" id="navUserTrigger" aria-haspopup="menu" aria-expanded="false" aria-label="Open user menu">
+        <%= ((currentUser?.username).trim().charAt(0)).toUpperCase() %>
+      </button>
+      <div class="nav-user__menu" id="navUserMenu" role="menu" aria-label="User menu">
+        <a href="/logout" class="nav-user__menu-link" role="menuitem">Logout</a>
+      </div>
+    </li>
   </ul>
 </nav>
+
+<script>
+  (() => {
+    const path = window.location.pathname;
+    const homeLink = document.querySelector('[data-nav-target="home"]');
+    const listLink = document.querySelector('[data-nav-target="list"]');
+
+    if (!homeLink || !listLink) return;
+
+    const isListPage = path.startsWith('/list') || path.startsWith('/detail') || path.startsWith('/edit');
+    const activeLink = isListPage ? listLink : homeLink;
+    activeLink.classList.add('nav__link--active');
+    activeLink.setAttribute('aria-current', 'page');
+
+    const userTrigger = document.getElementById('navUserTrigger');
+    const userMenu = document.getElementById('navUserMenu');
+
+    if (!userTrigger || !userMenu) return;
+
+    userTrigger.addEventListener('click', () => {
+      const isOpen = userMenu.classList.toggle('is-open');
+      userTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.nav-user')) {
+        userMenu.classList.remove('is-open');
+        userTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        userMenu.classList.remove('is-open');
+        userTrigger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  })();
+</script>
