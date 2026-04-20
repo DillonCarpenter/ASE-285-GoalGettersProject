@@ -23,19 +23,19 @@ theme: default
 - Categories are visually different - Completed
 ---
 ## Due Date Alerts
-- Overdue Tasks are highlighted - In Progress
-- Due Soon Tasks are highlighted - In Progress
-- These statuses update based on conditions - In Progress
+- Overdue and Due Soon Tasks are made visible - Completed
+- These statuses update based on conditions - Completed
 - The user is greated by a popup indicating what tasks they have due soon - Completed
+- This popup happens once upon logging in - Completed
 ---
 ## Sort & Filter Tasks
-- Users can sort tasks by: - In Progress
+- Users can sort tasks by: - Completed
 - Due date (Soonest to Latest, Latest or Soonest)  - Completed
 - Priority (High to Low, Low to High) - Completed
 ---
-- Users can filter tasks by: - In Progress
+- Users can filter tasks by: - Completed
 - Category (e.g., School only) - Completed
-- Priority (e.g., High only) - In Progress
+- Priority (e.g., High only) - Completed
 - Status (Completed or Incomplete) and Overdue - Completed
 - Sort and filter can be combined (e.g., Category = Work and Sort by due date). - Completed
 - Users can clear all filters. - Completed
