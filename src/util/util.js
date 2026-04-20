@@ -34,6 +34,7 @@ export async function runAddPost(req, resp) {
       description: req.body.description || "",
       date: req.body.date,
       category: req.body.category,
+      priority: req.body.priority || "",
       completed: typeof req.body.completed === "boolean" ? req.body.completed : false,
       user: username,
       userId: req.session.userId,

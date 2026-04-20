@@ -1,7 +1,7 @@
 import express from "express";
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
-import { getPostsCollection, getCounterCollection } from '../util/db.js';
+import { getPostsCollection, getCounterCollection } from "../util/db.js";
 import { runAddPost, runListGet } from "../util/util.js";
 import { User } from "../util/user.js";
 
@@ -12,7 +12,7 @@ export function createRouter(db) {
 
   const requireCurrentUser = (req, res, next) => {
     if (!res.locals.currentUser) {
-      return res.redirect('/login');
+      return res.redirect("/login");
     }
     next();
   };
@@ -56,7 +56,7 @@ export function createRouter(db) {
     if (!date || !value || value < 1) return null;
 
     if (durationUnit === "weeks") {
-      date.setDate(date.getDate() + (value * 7));
+      date.setDate(date.getDate() + value * 7);
     } else if (durationUnit === "months") {
       date.setMonth(date.getMonth() + value);
     } else {
@@ -79,14 +79,14 @@ export function createRouter(db) {
     return next.getTime() <= end.getTime();
   };
 
-  router.get('/', requireCurrentUser, async function (req, resp) {
+  router.get("/", requireCurrentUser, async function (req, resp) {
     try {
       if (!req.session.userId) {
         return resp.redirect("/login");
       }
 
       const now = new Date();
-      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
       const userTasks = await posts
         .find({ userId: req.session.userId })
@@ -95,19 +95,19 @@ export function createRouter(db) {
 
       const todaysTasks = userTasks
         .filter((task) => {
-          const taskDate = String(task.date || '').trim().slice(0, 10);
+          const taskDate = String(task.date || "").trim().slice(0, 10);
           return taskDate === today;
         })
         .slice(0, 5);
 
       const comingSoonTasks = userTasks
         .filter((task) => {
-          const taskDate = String(task.date || '').trim().slice(0, 10);
+          const taskDate = String(task.date || "").trim().slice(0, 10);
           return taskDate > today;
         })
         .sort((a, b) => {
-          const dateA = String(a.date || '').trim().slice(0, 10);
-          const dateB = String(b.date || '').trim().slice(0, 10);
+          const dateA = String(a.date || "").trim().slice(0, 10);
+          const dateB = String(b.date || "").trim().slice(0, 10);
           if (dateA !== dateB) return dateA.localeCompare(dateB);
           return Number(a.completed) - Number(b.completed);
         })
@@ -116,23 +116,25 @@ export function createRouter(db) {
       resp.render("index", { today, todaysTasks, comingSoonTasks });
     } catch (e) {
       console.error(e);
-      resp.status(500).send('Error loading home page.');
+      resp.status(500).send("Error loading home page.");
     }
   });
 
-  router.post('/add', requireCurrentUser, async function (req, resp) {
+  router.post("/add", requireCurrentUser, async function (req, resp) {
     try {
       const {
         title,
         description,
         date,
         category,
+        priority,
         recurrence,
         recurrenceDurationValue,
         recurrenceDurationUnit
       } = req.body;
 
       const allowed = new Set(["School", "Work", "Personal", "Others"]);
+      const allowedPriorities = new Set(["", "Low", "Medium", "High"]);
       const allowedRecurrence = new Set(["none", "daily", "weekly", "monthly"]);
       const allowedDurationUnits = new Set(["weeks", "months", "years"]);
       const today = new Date().toISOString().split("T")[0];
@@ -151,6 +153,11 @@ export function createRouter(db) {
 
       if (!allowed.has((category || "").trim())) {
         return resp.status(400).send("Invalid category.");
+      }
+
+      const safePriority = (priority || "").trim();
+      if (!allowedPriorities.has(safePriority)) {
+        return resp.status(400).send("Invalid priority.");
       }
 
       const safeRecurrence = (recurrence || "none").trim();
@@ -183,6 +190,7 @@ export function createRouter(db) {
         description: description || "",
         date,
         category: category.trim(),
+        priority: safePriority,
         completed: false,
         recurrence: safeRecurrence,
         recurrenceDurationValue: safeDurationValue,
@@ -192,14 +200,14 @@ export function createRouter(db) {
       };
 
       await runAddPost(req);
-      resp.redirect('/list');
+      resp.redirect("/list");
     } catch (e) {
       console.error(e);
-      resp.status(500).send('Error');
+      resp.status(500).send("Error");
     }
   });
 
-  router.get('/list', requireCurrentUser, function (req, resp) {
+  router.get("/list", requireCurrentUser, function (req, resp) {
     runListGet(req, resp);
   });
 
@@ -233,6 +241,7 @@ export function createRouter(db) {
             description: post.description || "",
             date: nextDate,
             category: post.category || "Personal",
+            priority: post.priority || "",
             completed: false,
             userId: req.session.userId,
             recurrence: post.recurrence,
@@ -276,67 +285,66 @@ export function createRouter(db) {
     }
   });
 
-  router.delete('/delete', requireCurrentUser, async function (req, resp) {
+  router.delete("/delete", requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body._id);
     if (!id) {
-      resp.status(400).send({ error: 'invalid id' });
+      resp.status(400).send({ error: "invalid id" });
       return;
     }
     try {
       await posts.deleteOne({ _id: id, userId: req.session.userId });
 
-      const query = { name: 'Total Post' };
+      const query = { name: "Total Post" };
       const stage = { $inc: { totalPost: -1 } };
       await counter.updateOne(query, stage);
 
-      console.log('Delete complete');
-      resp.send('Delete complete');
-    }
-    catch (e) {
+      console.log("Delete complete");
+      resp.send("Delete complete");
+    } catch (e) {
       console.error(e);
-      resp.status(500).send({ error: 'delete error' });
+      resp.status(500).send({ error: "delete error" });
     }
   });
 
-  router.get('/detail/:id', requireCurrentUser, async function (req, resp) {
+  router.get("/detail/:id", requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.params.id);
     if (!id) {
-      resp.status(400).send({ error: 'invalid id' });
+      resp.status(400).send({ error: "invalid id" });
       return;
     }
     try {
-      let res = await posts.findOne({ _id: id, userId: req.session.userId });
-      console.log('app.get.detail: Update complete');
+      const res = await posts.findOne({ _id: id, userId: req.session.userId });
+      console.log("app.get.detail: Update complete");
       console.log({ data: res });
       if (res != null) {
-        resp.render('detail.ejs', { data: res });
+        resp.render("detail.ejs", { data: res });
+      } else {
+        resp.status(500).send({ error: "result is null" });
       }
-      else {
-        resp.status(500).send({ error: 'result is null' });
-      }
-    }
-    catch (error) {
+    } catch (error) {
       console.log(error);
-      resp.status(500).send({ error: 'Error from db.collection().findOne()' });
+      resp.status(500).send({ error: "Error from db.collection().findOne()" });
     }
   });
 
-  router.put('/edit', requireCurrentUser, async function (req, resp) {
+  router.put("/edit", requireCurrentUser, async function (req, resp) {
     const id = parseObjectId(req.body.id);
     if (!id) {
-      return resp.status(400).send({ error: 'invalid id' });
+      return resp.status(400).send({ error: "invalid id" });
     }
 
     const {
       title,
       description,
       date,
+      priority,
       recurrence,
       recurrenceDurationValue,
       recurrenceDurationUnit
     } = req.body;
 
     const allowed = new Set(["School", "Work", "Personal", "Others"]);
+    const allowedPriorities = new Set(["", "Low", "Medium", "High"]);
     const allowedRecurrence = new Set(["none", "daily", "weekly", "monthly"]);
     const allowedDurationUnits = new Set(["weeks", "months", "years"]);
     const category = (req.body.category || "").trim();
@@ -356,6 +364,11 @@ export function createRouter(db) {
 
     if (!allowed.has(category)) {
       return resp.status(400).send("Invalid category.");
+    }
+
+    const safePriority = (priority || "").trim();
+    if (!allowedPriorities.has(safePriority)) {
+      return resp.status(400).send("Invalid priority.");
     }
 
     const safeRecurrence = (recurrence || "none").trim();
@@ -391,6 +404,7 @@ export function createRouter(db) {
             description: description || "",
             date,
             category,
+            priority: safePriority,
             recurrence: safeRecurrence,
             recurrenceDurationValue: safeDurationValue,
             recurrenceDurationUnit: safeDurationUnit,
@@ -400,15 +414,15 @@ export function createRouter(db) {
         }
       );
 
-      console.log('app.put.edit: Update complete');
-      resp.redirect('/list');
+      console.log("app.put.edit: Update complete");
+      resp.redirect("/list");
     } catch (e) {
       console.error(e);
       resp.status(500).send("Error updating task.");
     }
   });
 
-  router.get('/listjson', requireCurrentUser, async function (req, resp) {
+  router.get("/listjson", requireCurrentUser, async function (req, resp) {
     try {
       const res = await posts.find({ userId: req.session.userId }).toArray();
       resp.send(res);
@@ -417,27 +431,27 @@ export function createRouter(db) {
     }
   });
 
-  router.get('/login', (req, res) => {
-    if (req.session.userId) return res.redirect('/');
+  router.get("/login", (req, res) => {
+    if (req.session.userId) return res.redirect("/");
     res.render("login");
   });
 
-  router.get('/signup', (req, res) => {
-    res.render('signup');
+  router.get("/signup", (req, res) => {
+    res.render("signup");
   });
 
   const handleLogout = (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Logout failed.' });
+        return res.status(500).json({ error: "Logout failed." });
       }
-      res.clearCookie('connect.sid');
-      res.redirect('/login');
+      res.clearCookie("connect.sid");
+      res.redirect("/login");
     });
   };
 
-  router.get('/logout', handleLogout);
+  router.get("/logout", handleLogout);
 
   router.post("/login", async (req, resp) => {
     try {
@@ -445,20 +459,21 @@ export function createRouter(db) {
 
       const find_user = await User.findOne({ username });
       if (!find_user) return resp.status(400).json({ message: "Error: User Not Found." });
+
       const isMatch = await bcrypt.compare(password, find_user.password);
       if (!isMatch) return resp.status(400).json({ message: "Error: Invalid credentials." });
+
       req.session.userId = find_user._id;
       resp.json({ message: "Login successful" });
-
     } catch (e) {
       console.error(e);
       resp.status(500).json({ error: "Not successful." });
     }
   });
-  
-  router.post("/signup", async (req, resp)=> {
+
+  router.post("/signup", async (req, resp) => {
     try {
-      const {username, password} = req.body;
+      const { username, password } = req.body;
 
       const existingUser = await User.findOne({ username });
       if (existingUser) {
@@ -470,9 +485,10 @@ export function createRouter(db) {
         username,
         password: hashPass
       });
+
       await newUser.save();
       console.log("User created.");
-      resp.json({message: "User created."});
+      resp.json({ message: "User created." });
     } catch (e) {
       if (e && e.code === 11000) {
         return resp.status(409).json({ message: "Error: Username already exists." });

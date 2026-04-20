@@ -33,8 +33,18 @@
       </div>
 
       <div class="write-modal__group">
+        <select id="navTaskPriority" class="form-control form-select is-placeholder" name="priority">
+          <option value="" disabled selected hidden>Priority</option>
+          <option value="">None</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+
+      <div class="write-modal__group">
         <select id="navTaskRecurrence" class="form-control form-select is-placeholder" name="recurrence">
-          <option value="" disabled selected hidden>Does not repeat</option>
+          <option value="" disabled selected hidden>Recurrence</option>
           <option value="none">Does not repeat</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
