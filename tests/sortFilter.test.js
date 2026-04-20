@@ -8,6 +8,7 @@ describe("GoalGetters sort and filter", () => {
   let categoryFilter;
   let statusFilter;
   let overdueFilter;
+  let priorityFilter;
   let sortSelect;
   let clearFiltersBtn;
   let sortMenu;
@@ -24,6 +25,7 @@ describe("GoalGetters sort and filter", () => {
     const categoryValue = categoryFilter?.value || "";
     const statusValue = statusFilter?.value || "";
     const overdueValue = overdueFilter?.value || "";
+    const priorityValue = priorityFilter?.value || "";
     const sortValue = sortSelect?.value || "";
 
     const today = new Date();
@@ -37,8 +39,17 @@ describe("GoalGetters sort and filter", () => {
       const date = task.dataset.date || "";
       const description = (task.dataset.description || "").toLowerCase();
       const completed = task.dataset.completed === "true";
+      const priority = task.dataset.priority || "";
+      const normalizedPriority = priority || "none";
 
-      const searchText = [title, category.toLowerCase(), date.toLowerCase(), description].join(" ");
+      const searchText = [
+        title,
+        category.toLowerCase(),
+        date.toLowerCase(),
+        description,
+        priority.toLowerCase()
+      ].join(" ");
+
       const matchesSearch = searchText.includes(searchValue);
       const matchesCategory = !categoryValue || category === categoryValue;
       const matchesStatus =
@@ -54,8 +65,17 @@ describe("GoalGetters sort and filter", () => {
         (overdueValue === "overdue" && isOverdue) ||
         (overdueValue === "not-overdue" && !isOverdue);
 
+      const matchesPriority =
+        !priorityValue || normalizedPriority === priorityValue;
+
       task.style.display =
-        matchesSearch && matchesCategory && matchesStatus && matchesOverdue ? "" : "none";
+        matchesSearch &&
+        matchesCategory &&
+        matchesStatus &&
+        matchesOverdue &&
+        matchesPriority
+          ? ""
+          : "none";
     });
 
     const visibleTasks = tasks.filter((task) => task.style.display !== "none");
@@ -112,6 +132,14 @@ describe("GoalGetters sort and filter", () => {
           <option value="overdue">Overdue</option>
           <option value="not-overdue">Not Overdue</option>
         </select>
+
+        <select id="priorityFilter">
+          <option value=""></option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+          <option value="none">None</option>
+        </select>
       </div>
 
       <ul class="list-group">
@@ -120,6 +148,7 @@ describe("GoalGetters sort and filter", () => {
             data-category="School"
             data-date="2026-03-08"
             data-description="Assignment"
+            data-priority="High"
             data-completed="false"></li>
 
         <li class="list-group-item"
@@ -127,6 +156,7 @@ describe("GoalGetters sort and filter", () => {
             data-category="Work"
             data-date="2026-03-12"
             data-description="Report"
+            data-priority="Medium"
             data-completed="true"></li>
 
         <li class="list-group-item"
@@ -134,6 +164,7 @@ describe("GoalGetters sort and filter", () => {
             data-category="Personal"
             data-date="2026-03-15"
             data-description="Buy food"
+            data-priority=""
             data-completed="false"></li>
       </ul>
     `;
@@ -143,6 +174,7 @@ describe("GoalGetters sort and filter", () => {
     categoryFilter = document.getElementById("categoryFilter");
     statusFilter = document.getElementById("statusFilter");
     overdueFilter = document.getElementById("overdueFilter");
+    priorityFilter = document.getElementById("priorityFilter");
     clearFiltersBtn = document.getElementById("clearFiltersBtn");
     sortMenu = document.getElementById("sortMenu");
     filterMenu = document.getElementById("filterMenu");
@@ -152,6 +184,8 @@ describe("GoalGetters sort and filter", () => {
     categoryFilter.addEventListener("change", applyFiltersAndSort);
     statusFilter.addEventListener("change", applyFiltersAndSort);
     overdueFilter.addEventListener("change", applyFiltersAndSort);
+    priorityFilter.addEventListener("change", applyFiltersAndSort);
+    searchInput.addEventListener("input", applyFiltersAndSort);
 
     clearFiltersBtn.addEventListener("click", () => {
       searchInput.value = "";
@@ -159,6 +193,7 @@ describe("GoalGetters sort and filter", () => {
       categoryFilter.value = "";
       statusFilter.value = "";
       overdueFilter.value = "";
+      priorityFilter.value = "";
       sortMenu.style.display = "none";
       filterMenu.style.display = "none";
       applyFiltersAndSort();
@@ -202,6 +237,39 @@ describe("GoalGetters sort and filter", () => {
     expect(tasks[2].style.display).toBe("none");
   });
 
+  test("filters tasks by priority", () => {
+    const tasks = document.querySelectorAll(".list-group-item");
+
+    priorityFilter.value = "High";
+    priorityFilter.dispatchEvent(new Event("change"));
+
+    expect(tasks[0].style.display).toBe("");
+    expect(tasks[1].style.display).toBe("none");
+    expect(tasks[2].style.display).toBe("none");
+  });
+
+  test("filters tasks with no priority using none", () => {
+    const tasks = document.querySelectorAll(".list-group-item");
+
+    priorityFilter.value = "none";
+    priorityFilter.dispatchEvent(new Event("change"));
+
+    expect(tasks[0].style.display).toBe("none");
+    expect(tasks[1].style.display).toBe("none");
+    expect(tasks[2].style.display).toBe("");
+  });
+
+  test("search finds tasks by priority text", () => {
+    const tasks = document.querySelectorAll(".list-group-item");
+
+    searchInput.value = "medium";
+    searchInput.dispatchEvent(new Event("input"));
+
+    expect(tasks[0].style.display).toBe("none");
+    expect(tasks[1].style.display).toBe("");
+    expect(tasks[2].style.display).toBe("none");
+  });
+
   test("sorts visible tasks by due date ascending", () => {
     sortSelect.value = "due-asc";
     sortSelect.dispatchEvent(new Event("change"));
@@ -218,6 +286,7 @@ describe("GoalGetters sort and filter", () => {
     categoryFilter.value = "School";
     statusFilter.value = "incomplete";
     overdueFilter.value = "overdue";
+    priorityFilter.value = "High";
 
     clearFiltersBtn.click();
 
@@ -226,6 +295,7 @@ describe("GoalGetters sort and filter", () => {
     expect(categoryFilter.value).toBe("");
     expect(statusFilter.value).toBe("");
     expect(overdueFilter.value).toBe("");
+    expect(priorityFilter.value).toBe("");
     expect(sortMenu.style.display).toBe("none");
     expect(filterMenu.style.display).toBe("none");
   });
