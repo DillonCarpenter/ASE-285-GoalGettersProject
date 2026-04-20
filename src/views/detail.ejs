@@ -22,6 +22,7 @@
 
       <form action="/edit?_method=PUT" method="POST" class="write-modal__form">
         <input type="hidden" name="id" value="<%= data._id %>">
+        <input type="hidden" name="_id" value="<%= data._id %>">
 
         <div class="write-modal__group">
           <input
@@ -133,7 +134,23 @@
           </div>
         </div>
 
-        <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
+        <div class="detail-actions">
+          <button id="saveBtn" type="submit" class="btn btn-primary is-disabled" disabled>Save</button>
+          <button
+            id="deleteBtn"
+            type="button"
+            class="btn btn-delete-inline"
+            aria-label="Delete task"
+            title="Delete"
+          >
+            <svg class="btn_icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M18 6L17.1991 18.0129C17.129 19.065 17.0939 19.5911 16.8667 19.99C16.6666 20.3412 16.3648 20.6235 16.0011 20.7998C15.588 21 15.0607 21 14.0062 21H9.99377C8.93927 21 8.41202 21 7.99889 20.7998C7.63517 20.6235 7.33339 20.3412 7.13332 19.99C6.90607 19.5911 6.871 19.065 6.80086 18.0129L6 6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6"
+                fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -145,6 +162,8 @@
     const taskRecurrence = document.getElementById('taskRecurrence');
     const taskDurationWrap = document.getElementById('taskDurationWrap');
     const taskDurationValue = document.getElementById('taskDurationValue');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const taskIdInput = form.querySelector('input[name="_id"]');
     const today = new Date().toISOString().split('T')[0];
 
     if (taskDate) {
@@ -200,6 +219,33 @@
         }
       }
     });
+
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        const id = taskIdInput ? taskIdInput.value : '';
+        if (!id) {
+          alert('Unable to delete task: missing id.');
+          return;
+        }
+
+        try {
+          const res = await fetch('/delete', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ _id: id })
+          });
+
+          if (!res.ok) {
+            throw new Error('Delete failed');
+          }
+
+          window.location.href = '/list';
+        } catch (err) {
+          console.error(err);
+          alert('Failed to delete task. Please try again.');
+        }
+      });
+    }
 
     toggleDurationFields();
     updateSaveState();

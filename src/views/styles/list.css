@@ -56,6 +56,12 @@ html.list-page {
 	border-bottom: none;
 }
 
+.list-group-item.task-non-match {
+	opacity: 0.5;
+	filter: grayscale(100%);
+	transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
 /* checkbox on the far left, centered vertically */
 .list-group-item .task-circle {
 	grid-column: 1;
@@ -398,15 +404,6 @@ html.list-page {
 	box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2) inset;
 }
 
-.calendar-cell-has-match {
-	border-color: #6c63ff;
-	box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.3) inset;
-}
-
-.calendar-cell-today.calendar-cell-has-match {
-	box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.35) inset;
-}
-
 .calendar-day-number {
 	font-size: 0.92rem;
 	font-weight: 700;
@@ -453,6 +450,15 @@ html.list-page {
 
 .calendar-task-chip:hover {
 	filter: brightness(0.9);
+}
+
+.calendar-task-chip.filter-non-match {
+	opacity: 0.4;
+	filter: grayscale(100%);
+}
+
+.calendar-task-chip.filter-non-match:hover {
+	filter: grayscale(100%) brightness(0.9);
 }
 
 .calendar-task-chip.is-complete {

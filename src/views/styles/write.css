@@ -47,6 +47,36 @@
 	gap: 1.25rem;
 }
 
+.detail-actions {
+	display: flex;
+	align-items: stretch;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.detail-actions #saveBtn {
+	flex: 1 1 auto;
+	justify-content: center;
+}
+
+.btn-delete-inline {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 46px;
+	height: 46px;
+	border-radius: 6px;
+	padding: 0;
+	background: #dc2626;
+	color: #ffffff;
+}
+
+.btn-delete-inline:hover {
+	background: #b91c1c;
+	color: #ffffff;
+}
+
 .write-actions {
 	display: flex;
 	justify-content: flex-end;
