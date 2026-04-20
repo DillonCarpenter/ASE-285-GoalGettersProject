@@ -97,12 +97,14 @@
     const alertBody = document.getElementById('alertBody');
     const closeBtn = document.getElementById('navCloseAlertModalButton');
     const comingSoonTasks = JSON.parse('<%- JSON.stringify(comingSoonTasks) %>');
-    console.log(comingSoonTasks);
-    if(comingSoonTasks){
+    const alertTasks = comingSoonTasks.filter(task => !task.completed);
+    console.log(alertTasks);
+    if(alertTasks.length > 0 && !sessionStorage.getItem("alertShown")) {
       alertModal.style.display = "flex";
+      sessionStorage.setItem("alertShown", "true");
         alertBody.innerHTML += "";
         const ul = document.createElement("ul");
-        comingSoonTasks.forEach(task=> {
+        alertTasks.forEach(task=> {
           const li = document.createElement("li");
           li.textContent = task.title;
           li.className = "alert-li"
