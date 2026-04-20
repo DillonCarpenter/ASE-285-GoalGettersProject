@@ -65,7 +65,6 @@ html.list-page {
 	margin-top: 0;
 }
 
-/* title + badge in the middle column */
 .list-group-item h4 {
 	margin: 0;
 	font-size: 1.2rem;
@@ -78,7 +77,6 @@ html.list-page {
 	grid-column: 2;
 }
 
-/* date/description in the middle column */
 .list-group-item p {
 	margin: 0;
 	color: #cbd5e1;
@@ -86,7 +84,37 @@ html.list-page {
 	grid-column: 2;
 }
 
-/* actions on the far right */
+.task-priority-row {
+	grid-column: 2;
+	margin-top: 0.1rem;
+}
+
+.priority-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.2rem 0.55rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.priority-high {
+	background: rgba(239, 68, 68, 0.18);
+	color: #fca5a5;
+}
+
+.priority-medium {
+	background: rgba(251, 191, 36, 0.18);
+	color: #fcd34d;
+}
+
+.priority-low {
+	background: rgba(59, 130, 246, 0.18);
+	color: #93c5fd;
+}
+
 .list-actions {
 	grid-column: 3;
 	grid-row: 1 / span 2;
@@ -122,7 +150,6 @@ html.list-page {
 	background: #151a21;
 }
 
-/* Modern toolbar */
 .toolbar {
 	width: min(920px, 92vw);
 	margin: 0;
@@ -493,5 +520,4 @@ html.list-page {
 		font-size: 0.68rem;
 		padding: 0.3rem 0.35rem;
 	}
-}
 }
